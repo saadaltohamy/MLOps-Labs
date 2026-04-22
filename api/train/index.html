@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="saadaltohamy" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>train - mlops-lab0</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "train";
+        var mkdocs_page_input_path = "api/train.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/bash.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/yaml.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> mlops-lab0
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../getting-started/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../pipeline/">Pipeline Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../config/">config</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../logger/">logger</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../download_data/">download_data</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../preprocess/">preprocess</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">train</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#constants">Constants</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#model_names">MODEL_NAMES</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#prepare_catboost_frame">prepare_catboost_frame</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sample_model_params">sample_model_params</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#build_model_from_params">build_model_from_params</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_init_wandb_if_available">_init_wandb_if_available</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#run_training">run_training</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../test_model/">test_model</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../inference/">inference</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../tests/">Data Validation Tests</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">mlops-lab0</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">API Reference</li>
+      <li class="breadcrumb-item active">train</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="srctrain"><code>src.train</code><a class="headerlink" href="#srctrain" title="Permanent link">&para;</a></h1>
+<p>Training module. Runs Optuna hyperparameter optimization across 6 model families, saves the best model, generates metrics and charts, and optionally logs to Weights &amp; Biases.</p>
+<hr />
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">python src/train.py
+</code></pre>
+<hr />
+<h2 id="constants">Constants<a class="headerlink" href="#constants" title="Permanent link">&para;</a></h2>
+<h3 id="model_names"><code>MODEL_NAMES</code><a class="headerlink" href="#model_names" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">MODEL_NAMES: list[str] = [
+    &quot;random_forest&quot;,
+    &quot;extra_trees&quot;,
+    &quot;gradient_boosting&quot;,
+    &quot;hist_gradient_boosting&quot;,
+    &quot;xgboost&quot;,
+    &quot;catboost&quot;,
+]
+</code></pre>
+<p>The list of model families that Optuna searches across.</p>
+<hr />
+<h2 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h2>
+<h3 id="prepare_catboost_frame"><code>prepare_catboost_frame</code><a class="headerlink" href="#prepare_catboost_frame" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">def prepare_catboost_frame(
+    frame: pd.DataFrame,
+    categorical_features: list[str]
+) -&gt; pd.DataFrame
+</code></pre>
+<p>Prepares a DataFrame for CatBoost by filling NaN values in categorical columns with <code>"missing"</code> and casting them to string type.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>frame</code></td>
+<td><code>pd.DataFrame</code></td>
+<td>Input DataFrame</td>
+</tr>
+<tr>
+<td><code>categorical_features</code></td>
+<td><code>list[str]</code></td>
+<td>Names of categorical columns to prepare</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> A copy of the DataFrame with categorical columns cleaned.</p>
+<hr />
+<h3 id="sample_model_params"><code>sample_model_params</code><a class="headerlink" href="#sample_model_params" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">def sample_model_params(trial: optuna.Trial) -&gt; dict
+</code></pre>
+<p>Samples hyperparameters for a given Optuna trial. First selects a model family via <code>trial.suggest_categorical</code>, then samples family-specific hyperparameters.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>trial</code></td>
+<td><code>optuna.Trial</code></td>
+<td>The current Optuna trial object</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dict</code></td>
+<td>Dictionary containing <code>"model_name"</code> and all sampled hyperparameters</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Hyperparameter Ranges by Model:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Key Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Random Forest</td>
+<td><code>n_estimators</code> (200–700), <code>max_depth</code> (3–16), <code>min_samples_split</code>, <code>min_samples_leaf</code>, <code>max_features</code></td>
+</tr>
+<tr>
+<td>Extra Trees</td>
+<td>Same ranges as Random Forest</td>
+</tr>
+<tr>
+<td>Gradient Boosting</td>
+<td><code>n_estimators</code> (100–500), <code>learning_rate</code> (0.01–0.2), <code>max_depth</code> (2–6), <code>subsample</code> (0.6–1.0)</td>
+</tr>
+<tr>
+<td>Hist Gradient Boosting</td>
+<td><code>max_iter</code> (150–600), <code>learning_rate</code> (0.01–0.2), <code>max_leaf_nodes</code> (15–63), <code>l2_regularization</code></td>
+</tr>
+<tr>
+<td>XGBoost</td>
+<td><code>n_estimators</code> (150–700), <code>learning_rate</code> (0.01–0.2), <code>max_depth</code> (3–10), <code>reg_alpha</code>, <code>reg_lambda</code></td>
+</tr>
+<tr>
+<td>CatBoost</td>
+<td><code>iterations</code> (200–800), <code>learning_rate</code> (0.01–0.2), <code>depth</code> (4–10), <code>l2_leaf_reg</code>, <code>bagging_temperature</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="build_model_from_params"><code>build_model_from_params</code><a class="headerlink" href="#build_model_from_params" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">def build_model_from_params(
+    params: dict,
+    onehot_preprocessor: ColumnTransformer,
+    hist_preprocessor: ColumnTransformer,
+    scale_pos_weight: float,
+    hist_categorical_feature_idx: list[int],
+    categorical_features: list[str],
+    X_train: pd.DataFrame,
+    X_train_catboost: pd.DataFrame,
+) -&gt; tuple
+</code></pre>
+<p>Constructs a full estimator (with preprocessing pipeline) from sampled parameters.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>params</code></td>
+<td><code>dict</code></td>
+<td>Hyperparameters from <code>sample_model_params()</code></td>
+</tr>
+<tr>
+<td><code>onehot_preprocessor</code></td>
+<td><code>ColumnTransformer</code></td>
+<td>Fitted OneHotEncoder-based preprocessor</td>
+</tr>
+<tr>
+<td><code>hist_preprocessor</code></td>
+<td><code>ColumnTransformer</code></td>
+<td>Fitted OrdinalEncoder-based preprocessor</td>
+</tr>
+<tr>
+<td><code>scale_pos_weight</code></td>
+<td><code>float</code></td>
+<td>Class imbalance ratio for XGBoost</td>
+</tr>
+<tr>
+<td><code>hist_categorical_feature_idx</code></td>
+<td><code>list[int]</code></td>
+<td>Categorical column indices for HistGBT</td>
+</tr>
+<tr>
+<td><code>categorical_features</code></td>
+<td><code>list[str]</code></td>
+<td>Categorical column names for CatBoost</td>
+</tr>
+<tr>
+<td><code>X_train</code></td>
+<td><code>pd.DataFrame</code></td>
+<td>Training features (standard)</td>
+</tr>
+<tr>
+<td><code>X_train_catboost</code></td>
+<td><code>pd.DataFrame</code></td>
+<td>Training features (CatBoost-prepared)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tuple[estimator, DataFrame, dict]</code></td>
+<td><code>(model_or_pipeline, X_to_use, fit_kwargs)</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Model-to-Preprocessor Mapping:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Preprocessor</th>
+<th>Wrapping</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Random Forest</td>
+<td><code>onehot_preprocessor</code></td>
+<td><code>sklearn.Pipeline</code></td>
+</tr>
+<tr>
+<td>Extra Trees</td>
+<td><code>onehot_preprocessor</code></td>
+<td><code>sklearn.Pipeline</code></td>
+</tr>
+<tr>
+<td>Gradient Boosting</td>
+<td><code>onehot_preprocessor</code></td>
+<td><code>sklearn.Pipeline</code></td>
+</tr>
+<tr>
+<td>Hist Gradient Boosting</td>
+<td><code>hist_preprocessor</code></td>
+<td><code>sklearn.Pipeline</code></td>
+</tr>
+<tr>
+<td>XGBoost</td>
+<td><code>onehot_preprocessor</code></td>
+<td><code>sklearn.Pipeline</code></td>
+</tr>
+<tr>
+<td>CatBoost</td>
+<td>None (native)</td>
+<td>Standalone <code>CatBoostClassifier</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="_init_wandb_if_available"><code>_init_wandb_if_available</code><a class="headerlink" href="#_init_wandb_if_available" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">def _init_wandb_if_available() -&gt; wandb | None
+</code></pre>
+<p>Checks if <code>WANDB_API_KEY</code> is set in the environment. If so, calls <code>wandb.login()</code> and returns the <code>wandb</code> module. If not, logs a warning and returns <code>None</code>.</p>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wandb</code> module or <code>None</code></td>
+<td>The wandb module if available, else <code>None</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="run_training"><code>run_training</code><a class="headerlink" href="#run_training" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">def run_training() -&gt; None
+</code></pre>
+<p>Main training entry point. Orchestrates the full Optuna optimization workflow.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Load processed data (<code>X_train</code>, <code>y_train</code>) from <code>data/processed/</code></li>
+<li>Load preprocessing pipelines from pickle</li>
+<li>Initialize wandb if API key is available</li>
+<li>Define the Optuna objective function (5-fold StratifiedKFold, ROC-AUC metric)</li>
+<li>Run Optuna study with <code>n_trials</code> from config</li>
+<li>Retrain the best model on the full training set</li>
+<li>Save model bundle to pickle</li>
+<li>Save metrics to <code>reports/metrics.json</code></li>
+<li>Generate top-10 trials bar chart</li>
+</ol>
+<p><strong>Config Keys Used:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>training.n_trials</code></td>
+<td>Number of Optuna trials</td>
+</tr>
+<tr>
+<td><code>training.cv_folds</code></td>
+<td>Number of cross-validation folds</td>
+</tr>
+<tr>
+<td><code>training.random_state</code></td>
+<td>Random seed</td>
+</tr>
+<tr>
+<td><code>training.model_path</code></td>
+<td>Where to save the best model</td>
+</tr>
+<tr>
+<td><code>training.study_name</code></td>
+<td>Optuna study name</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Output Files:</strong></p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>models/best_model.pkl</code></td>
+<td>Serialized best model bundle</td>
+</tr>
+<tr>
+<td><code>reports/metrics.json</code></td>
+<td>Training metrics (accuracy, ROC-AUC, best params)</td>
+</tr>
+<tr>
+<td><code>reports/figures/optuna_top10_accuracy.png</code></td>
+<td>Top 10 trials bar chart</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Model Bundle Contents:</strong></p>
+<pre><code class="language-python">{
+    &quot;model&quot;: estimator,          # Trained model (Pipeline or CatBoostClassifier)
+    &quot;model_name&quot;: str,           # e.g. &quot;xgboost&quot;
+    &quot;best_roc_auc_cv&quot;: float,    # Best cross-validation ROC-AUC
+    &quot;best_params&quot;: dict,         # Best hyperparameters
+}
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../preprocess/" class="btn btn-neutral float-left" title="preprocess"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../test_model/" class="btn btn-neutral float-right" title="test_model">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../preprocess/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../test_model/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

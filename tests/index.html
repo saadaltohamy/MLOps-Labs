@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="saadaltohamy" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Data Validation Tests - mlops-lab0</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Data Validation Tests";
+        var mkdocs_page_input_path = "tests.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/bash.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/yaml.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> mlops-lab0
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../pipeline/">Pipeline Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../api/config/">config</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../api/logger/">logger</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../api/download_data/">download_data</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../api/preprocess/">preprocess</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../api/train/">train</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../api/test_model/">test_model</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../api/inference/">inference</a>
+                  </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Data Validation Tests</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#running-tests">Running Tests</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#test-descriptions">Test Descriptions</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#test_data_files_exist">test_data_files_exist</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#test_preprocessing_pipeline_exists">test_preprocessing_pipeline_exists</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#test_no_missing_values_after_transform">test_no_missing_values_after_transform</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#test_correct_shape">test_correct_shape</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#test_target_is_binary">test_target_is_binary</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#test_no_duplicate_rows">test_no_duplicate_rows</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#test_train_valid_split_ratio">test_train_valid_split_ratio</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#fixtures">Fixtures</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">mlops-lab0</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Data Validation Tests</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="data-validation-tests">Data Validation Tests<a class="headerlink" href="#data-validation-tests" title="Permanent link">&para;</a></h1>
+<p>Data validation tests run automatically after preprocessing (Step 3 in the pipeline).
+If any test fails, the pipeline stops — training will <strong>not</strong> proceed with invalid data.</p>
+<hr />
+<h2 id="running-tests">Running Tests<a class="headerlink" href="#running-tests" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">python -m pytest tests/test_data.py -v
+</code></pre>
+<hr />
+<h2 id="test-descriptions">Test Descriptions<a class="headerlink" href="#test-descriptions" title="Permanent link">&para;</a></h2>
+<h3 id="test_data_files_exist"><code>test_data_files_exist</code><a class="headerlink" href="#test_data_files_exist" title="Permanent link">&para;</a></h3>
+<p>Verifies that all expected processed data files exist on disk:</p>
+<ul>
+<li><code>data/processed/X_train.csv</code></li>
+<li><code>data/processed/X_valid.csv</code></li>
+<li><code>data/processed/y_train.csv</code></li>
+<li><code>data/processed/y_valid.csv</code></li>
+<li><code>data/processed/X_test_competition.csv</code></li>
+<li><code>data/processed/test_passenger_ids.csv</code></li>
+</ul>
+<hr />
+<h3 id="test_preprocessing_pipeline_exists"><code>test_preprocessing_pipeline_exists</code><a class="headerlink" href="#test_preprocessing_pipeline_exists" title="Permanent link">&para;</a></h3>
+<p>Verifies that the fitted preprocessing pipeline pickle file exists at the path specified in <code>config.yaml</code> (default: <code>models/preprocessing_pipeline.pkl</code>).</p>
+<hr />
+<h3 id="test_no_missing_values_after_transform"><code>test_no_missing_values_after_transform</code><a class="headerlink" href="#test_no_missing_values_after_transform" title="Permanent link">&para;</a></h3>
+<p>Applies the fitted <code>onehot_preprocessor</code> to both <code>X_train</code> and <code>X_valid</code>, then asserts that the transformed arrays contain <strong>no NaN values</strong>.</p>
+<p>This validates that the <code>SimpleImputer</code> steps in the preprocessing pipeline are working correctly.</p>
+<hr />
+<h3 id="test_correct_shape"><code>test_correct_shape</code><a class="headerlink" href="#test_correct_shape" title="Permanent link">&para;</a></h3>
+<p>Asserts that:</p>
+<ol>
+<li><code>X_train</code> and <code>X_valid</code> have the <strong>same number of columns</strong></li>
+<li>The column count matches the total number of configured features (<code>numeric_features</code> + <code>categorical_features</code>)</li>
+</ol>
+<hr />
+<h3 id="test_target_is_binary"><code>test_target_is_binary</code><a class="headerlink" href="#test_target_is_binary" title="Permanent link">&para;</a></h3>
+<p>Asserts that <code>y_train</code> and <code>y_valid</code> only contain values <strong>0</strong> and <strong>1</strong>.</p>
+<hr />
+<h3 id="test_no_duplicate_rows"><code>test_no_duplicate_rows</code><a class="headerlink" href="#test_no_duplicate_rows" title="Permanent link">&para;</a></h3>
+<p>Checks for duplicate rows in <code>X_train</code>. Because we drop identifier columns (Name, Ticket, Cabin, PassengerId), some passengers may naturally have identical feature values.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This test <strong>warns</strong> rather than fails, since feature-level duplicates are expected for the Titanic dataset after dropping identifiers.</p>
+</div>
+<hr />
+<h3 id="test_train_valid_split_ratio"><code>test_train_valid_split_ratio</code><a class="headerlink" href="#test_train_valid_split_ratio" title="Permanent link">&para;</a></h3>
+<p>Asserts that the actual validation split ratio approximately matches the configured <code>test_size</code> (within ±5% tolerance).</p>
+<hr />
+<h2 id="fixtures">Fixtures<a class="headerlink" href="#fixtures" title="Permanent link">&para;</a></h2>
+<p>The tests use <code>pytest</code> module-scoped fixtures to load data efficiently:</p>
+<table>
+<thead>
+<tr>
+<th>Fixture</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>processed_dir</code></td>
+<td>Resolved path to <code>data/processed/</code></td>
+</tr>
+<tr>
+<td><code>X_train</code></td>
+<td>Loaded <code>X_train.csv</code> as a DataFrame</td>
+</tr>
+<tr>
+<td><code>X_valid</code></td>
+<td>Loaded <code>X_valid.csv</code> as a DataFrame</td>
+</tr>
+<tr>
+<td><code>y_train</code></td>
+<td>Loaded <code>y_train.csv</code> as a Series</td>
+</tr>
+<tr>
+<td><code>y_valid</code></td>
+<td>Loaded <code>y_valid.csv</code> as a Series</td>
+</tr>
+<tr>
+<td><code>pipeline_bundle</code></td>
+<td>Loaded preprocessing pipeline pickle dict</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../api/inference/" class="btn btn-neutral float-left" title="inference"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../api/inference/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

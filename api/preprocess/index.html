@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="saadaltohamy" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>preprocess - mlops-lab0</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "preprocess";
+        var mkdocs_page_input_path = "api/preprocess.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/bash.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/yaml.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> mlops-lab0
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../getting-started/">Getting Started</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../pipeline/">Pipeline Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../configuration/">Configuration</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../config/">config</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../logger/">logger</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../download_data/">download_data</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">preprocess</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#build_preprocessors">build_preprocessors</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#run_preprocessing">run_preprocessing</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../train/">train</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../test_model/">test_model</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../inference/">inference</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../tests/">Data Validation Tests</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">mlops-lab0</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">API Reference</li>
+      <li class="breadcrumb-item active">preprocess</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="srcpreprocess"><code>src.preprocess</code><a class="headerlink" href="#srcpreprocess" title="Permanent link">&para;</a></h1>
+<p>Preprocessing module. Loads raw data, builds sklearn preprocessing pipelines, splits data into train/validation sets, and saves all artifacts.</p>
+<hr />
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
+<pre><code class="language-bash">python src/preprocess.py
+</code></pre>
+<hr />
+<h2 id="functions">Functions<a class="headerlink" href="#functions" title="Permanent link">&para;</a></h2>
+<h3 id="build_preprocessors"><code>build_preprocessors</code><a class="headerlink" href="#build_preprocessors" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">def build_preprocessors(
+    numeric_features: list[str],
+    categorical_features: list[str],
+) -&gt; tuple[ColumnTransformer, ColumnTransformer]
+</code></pre>
+<p>Builds two sklearn <code>ColumnTransformer</code> preprocessing pipelines:</p>
+<ol>
+<li><strong><code>onehot_preprocessor</code></strong> — uses <code>SimpleImputer(median)</code> for numerics + <code>OneHotEncoder</code> for categoricals. Used by: Random Forest, Extra Trees, Gradient Boosting, XGBoost.</li>
+<li><strong><code>hist_preprocessor</code></strong> — uses <code>SimpleImputer(median)</code> for numerics + <code>OrdinalEncoder</code> for categoricals. Used by: Hist Gradient Boosting.</li>
+</ol>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>numeric_features</code></td>
+<td><code>list[str]</code></td>
+<td>Column names of numeric features (e.g. <code>["Age", "Fare"]</code>)</td>
+</tr>
+<tr>
+<td><code>categorical_features</code></td>
+<td><code>list[str]</code></td>
+<td>Column names of categorical features (e.g. <code>["Sex", "Embarked"]</code>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tuple[ColumnTransformer, ColumnTransformer]</code></td>
+<td><code>(onehot_preprocessor, hist_preprocessor)</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Pipeline Details:</strong></p>
+<pre><code>onehot_preprocessor:
+  ├─ num: SimpleImputer(strategy=&quot;median&quot;)
+  └─ cat: SimpleImputer(strategy=&quot;most_frequent&quot;) → OneHotEncoder(handle_unknown=&quot;ignore&quot;)
+
+hist_preprocessor:
+  ├─ num: SimpleImputer(strategy=&quot;median&quot;)
+  └─ cat: SimpleImputer(strategy=&quot;most_frequent&quot;) → OrdinalEncoder(handle_unknown=&quot;use_encoded_value&quot;)
+</code></pre>
+<hr />
+<h3 id="run_preprocessing"><code>run_preprocessing</code><a class="headerlink" href="#run_preprocessing" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">def run_preprocessing() -&gt; None
+</code></pre>
+<p>Main preprocessing pipeline entry point.</p>
+<p><strong>Steps:</strong></p>
+<ol>
+<li>Load raw <code>train.csv</code> and <code>test.csv</code> from paths in config</li>
+<li>Drop columns specified in <code>preprocessing.dropped_columns</code></li>
+<li>Extract target column (<code>Survived</code>)</li>
+<li>Split into train/validation using <code>train_test_split</code> with stratification</li>
+<li>Build and fit both preprocessors on <code>X_train</code></li>
+<li>Compute helper values: <code>scale_pos_weight</code>, <code>hist_categorical_feature_idx</code></li>
+<li>Save processed CSVs to <code>data/processed/</code></li>
+<li>Save preprocessing pipeline bundle to pickle</li>
+</ol>
+<p><strong>Config Keys Used:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data.train_csv</code></td>
+<td>Path to raw training CSV</td>
+</tr>
+<tr>
+<td><code>data.test_csv</code></td>
+<td>Path to raw test CSV</td>
+</tr>
+<tr>
+<td><code>data.processed_dir</code></td>
+<td>Output directory for processed data</td>
+</tr>
+<tr>
+<td><code>preprocessing.dropped_columns</code></td>
+<td>Columns to exclude from features</td>
+</tr>
+<tr>
+<td><code>preprocessing.target_column</code></td>
+<td>Target column name</td>
+</tr>
+<tr>
+<td><code>preprocessing.numeric_features</code></td>
+<td>Numeric feature column names</td>
+</tr>
+<tr>
+<td><code>preprocessing.categorical_features</code></td>
+<td>Categorical feature column names</td>
+</tr>
+<tr>
+<td><code>preprocessing.test_size</code></td>
+<td>Validation split ratio</td>
+</tr>
+<tr>
+<td><code>preprocessing.random_state</code></td>
+<td>Random seed</td>
+</tr>
+<tr>
+<td><code>preprocessing.pipeline_path</code></td>
+<td>Path to save the pipeline pickle</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Output Files:</strong></p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data/processed/X_train.csv</code></td>
+<td>Training features</td>
+</tr>
+<tr>
+<td><code>data/processed/X_valid.csv</code></td>
+<td>Validation features</td>
+</tr>
+<tr>
+<td><code>data/processed/y_train.csv</code></td>
+<td>Training labels</td>
+</tr>
+<tr>
+<td><code>data/processed/y_valid.csv</code></td>
+<td>Validation labels</td>
+</tr>
+<tr>
+<td><code>data/processed/X_test_competition.csv</code></td>
+<td>Competition test features</td>
+</tr>
+<tr>
+<td><code>data/processed/test_passenger_ids.csv</code></td>
+<td>PassengerIds for inference</td>
+</tr>
+<tr>
+<td><code>models/preprocessing_pipeline.pkl</code></td>
+<td>Fitted preprocessor bundle</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Pickle Bundle Contents:</strong></p>
+<p>The saved pickle file contains a dictionary with:</p>
+<pre><code class="language-python">{
+    &quot;onehot_preprocessor&quot;: ColumnTransformer,   # Fitted onehot pipeline
+    &quot;hist_preprocessor&quot;: ColumnTransformer,      # Fitted ordinal pipeline
+    &quot;scale_pos_weight&quot;: float,                   # Class weight ratio
+    &quot;hist_categorical_feature_idx&quot;: list[int],   # Categorical column indices
+    &quot;numeric_features&quot;: list[str],               # Feature names
+    &quot;categorical_features&quot;: list[str],           # Feature names
+}
+</code></pre>
+<p><strong>Raises:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Exception</th>
+<th>Condition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FileNotFoundError</code></td>
+<td>If <code>train.csv</code> is not found at the configured path</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../download_data/" class="btn btn-neutral float-left" title="download_data"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../train/" class="btn btn-neutral float-right" title="train">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../download_data/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../train/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
