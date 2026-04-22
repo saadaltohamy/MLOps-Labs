@@ -1,0 +1,29 @@
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  train_csv: "data/raw/train.csv"
+  test_csv: "data/raw/test.csv"
+
+preprocessing:
+  dropped_columns: ["Cabin", "PassengerId", "Ticket", "Name", "Survived"]
+  target_column: "Survived"
+  numeric_features: ["Age", "SibSp", "Parch", "Fare"]
+  categorical_features: ["Pclass", "Sex", "Embarked"]
+  test_size: 0.2
+  random_state: 42
+  pipeline_path: "models/preprocessing_pipeline.pkl"
+
+training:
+  n_trials: 30
+  cv_folds: 5
+  random_state: 42
+  model_path: "models/best_model.pkl"
+  study_name: "titanic_tree_search"
+
+reports:
+  dir: "reports"
+  metrics_file: "reports/metrics.json"
+  optuna_top10_chart: "reports/figures/optuna_top10_accuracy.png"
+
+models:
+  dir: "models"

@@ -1,0 +1,32 @@
+site_name: mlops-lab0
+site_author: saadaltohamy
+site_description: Documentation for the Titanic ML Pipeline — ITI MLOps Lab 0
+
+theme:
+  name: readthedocs
+  highlightjs: true
+  hljs_languages:
+    - python
+    - bash
+    - yaml
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Pipeline Overview: pipeline.md
+  - Configuration: configuration.md
+  - API Reference:
+      - config: api/config.md
+      - logger: api/logger.md
+      - download_data: api/download_data.md
+      - preprocess: api/preprocess.md
+      - train: api/train.md
+      - test_model: api/test_model.md
+      - inference: api/inference.md
+  - Data Validation Tests: tests.md
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
