@@ -3,9 +3,14 @@
 <a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
     <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
 </a>
+<a target="_blank" href="https://saadaltohamy.github.io/MLOps-Labs/">
+    <img src="https://img.shields.io/badge/docs-MKDocs-blue?logo=readthedocs" />
+</a>
 
 A production-ready, modular machine learning pipeline for the Titanic survival prediction task.
 Built as part of the **ITI MLOps Course — Lab 0**.
+
+📖 **[Full Documentation →](https://saadaltohamy.github.io/MLOps-Labs/)**
 
 ---
 
