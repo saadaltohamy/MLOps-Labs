@@ -117,7 +117,7 @@
 <hr />
 <h2 id="pipeline-flow">Pipeline Flow<a class="headerlink" href="#pipeline-flow" title="Permanent link">&para;</a></h2>
 <pre><code>┌──────────────────────────────────────────────────────────────┐
-│                    run_pipeline.sh                            │
+│                    run_pipeline.sh                           │
 ├──────────────────────────────────────────────────────────────┤
 │                                                              │
 │  Step 1: download_data.py                                    │
@@ -146,7 +146,7 @@
 │  ├─ Load processed data + preprocessing pipelines            │
 │  ├─ Run Optuna study (n_trials from config)                  │
 │  ├─ Search across 6 model families:                          │
-│  │   RF, ExtraTrees, GBT, HistGBT, XGBoost, CatBoost        │
+│  │   RF, ExtraTrees, GBT, HistGBT, XGBoost, CatBoost         │
 │  ├─ 5-fold StratifiedKFold cross-validation                  │
 │  ├─ Optional: log to Weights &amp; Biases                        │
 │  ├─ Retrain best model on full training set                  │
