@@ -1,4 +1,4 @@
-# 🚢 Titanic ML Pipeline — MLOps Lab 0
+# 🚢 Titanic ML Pipeline — MLOps Labs
 
 <a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
     <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
@@ -8,7 +8,7 @@
 </a>
 
 A production-ready, modular machine learning pipeline for the Titanic survival prediction task.
-Built as part of the **ITI MLOps Course — Lab 0**.
+Built as part of the **ITI MLOps Course — Labs**.
 
 📖 **[Full Documentation →](https://saadaltohamy.github.io/MLOps-Labs/)**
 
@@ -29,7 +29,7 @@ Built as part of the **ITI MLOps Course — Lab 0**.
 ## 📁 Project Structure
 
 ```
-mlops-lab0/
+MLOps-Labs/
 ├── config.yaml                     # Central configuration (paths, features, training params)
 ├── .env                            # Environment variables (Kaggle + wandb keys)
 ├── .env.example                    # Template for .env
