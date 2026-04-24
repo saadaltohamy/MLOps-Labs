@@ -21,7 +21,7 @@ Built as part of the **ITI MLOps Course — Lab 0**.
 - **Weights & Biases integration** — optional experiment tracking (auto-enabled if `WANDB_API_KEY` is set)
 - **Data validation tests** — `pytest` checks run after preprocessing; training only proceeds if all tests pass
 - **Colored logging** — all pipeline output uses a centralized logger with color-coded log levels
-- **Config-driven** — all paths, features, and hyperparameters are controlled via `config.yaml`
+- **Hydra config management** — all settings in `config.yaml` with **CLI overrides** (`training.n_trials=5`)
 - **CLI inference** — predict on new CSV data with a single command
 
 ---
@@ -36,7 +36,7 @@ mlops-lab0/
 ├── run_pipeline.sh                 # One-command pipeline orchestration
 │
 ├── src/                            # Pipeline source modules
-│   ├── config.py                   # YAML config loader
+│   ├── config.py                   # Hydra Compose API config loader (supports CLI overrides)
 │   ├── logger.py                   # Centralized colored logger
 │   ├── download_data.py            # Download data from Kaggle
 │   ├── preprocess.py               # Build sklearn pipelines, split & save data
@@ -140,11 +140,11 @@ This executes all steps in order:
 
 | Step | Command | Description |
 |------|---------|-------------|
-| 1 | `python src/download_data.py` | Downloads Titanic data from Kaggle (skips if already present) |
-| 2 | `python src/preprocess.py` | Builds preprocessing pipelines, splits data, saves artifacts |
+| 1 | `python -m src.download_data` | Downloads Titanic data from Kaggle (skips if already present) |
+| 2 | `python -m src.preprocess` | Builds preprocessing pipelines, splits data, saves artifacts |
 | 3 | `pytest tests/test_data.py -v` | Validates processed data — **pipeline stops if tests fail** |
-| 4 | `python src/train.py` | Runs Optuna HPO (30 trials), saves best model + metrics + chart |
-| 5 | `python src/test_model.py` | Evaluates on validation set, reports accuracy + ROC-AUC |
+| 4 | `python -m src.train` | Runs Optuna HPO (30 trials), saves best model + metrics + chart |
+| 5 | `python -m src.test_model` | Evaluates on validation set, reports accuracy + ROC-AUC |
 
 ---
 
@@ -154,22 +154,25 @@ You can run any step independently:
 
 ```bash
 # Download data
-python src/download_data.py
+python -m src.download_data
 
 # Preprocess
-python src/preprocess.py
+python -m src.preprocess
 
 # Validate data
 python -m pytest tests/test_data.py -v
 
-# Train
-python src/train.py
+# Train (with default config)
+python -m src.train
+
+# Train with CLI overrides (Hydra)
+python -m src.train training.n_trials=50 training.cv_folds=10
 
 # Test
-python src/test_model.py
+python -m src.test_model
 
 # Inference on new data
-python src/inference.py --input data/raw/test.csv --output reports/predictions.csv
+python -m src.inference --input data/raw/test.csv --output reports/predictions.csv
 ```
 
 ---
@@ -198,9 +201,9 @@ Output CSV contains:
 
 ---
 
-## ⚙️ Configuration
+## ⚙️ Configuration (Hydra)
 
-All pipeline settings are controlled via [`config.yaml`](config.yaml):
+Configuration is managed via [Hydra](https://hydra.cc/) using the **Compose API**. All settings live in [`config.yaml`](config.yaml):
 
 ```yaml
 data:
@@ -219,6 +222,23 @@ training:
   cv_folds: 5           # Cross-validation folds
   model_path: "models/best_model.pkl"
 ```
+
+### CLI Overrides
+
+Override **any** config value from the command line — no file edits needed:
+
+```bash
+# Quick experiment with fewer trials
+python -m src.train training.n_trials=5
+
+# Override multiple values
+python -m src.train training.n_trials=100 training.cv_folds=10
+
+# Change split ratio for preprocessing
+python -m src.preprocess preprocessing.test_size=0.3
+```
+
+Overrides use **dot notation** to reach nested keys. The override is applied on top of `config.yaml` defaults — the file itself is not modified.
 
 ---
 
@@ -273,6 +293,7 @@ Then open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
 | **XGBoost** | Gradient boosting classifier |
 | **CatBoost** | Categorical-aware boosting |
 | **Optuna** | Hyperparameter optimization |
+| **Hydra** | Configuration management with CLI overrides |
 | **Weights & Biases** | Experiment tracking (optional) |
 | **pytest** | Data validation testing |
 | **MKDocs** | Project documentation |

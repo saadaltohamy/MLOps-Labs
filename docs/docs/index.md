@@ -1,8 +1,8 @@
 # 🚢 Titanic ML Pipeline
 
-Welcome to the documentation for **mlops-lab0** — a modular, production-ready machine learning pipeline for the Titanic survival prediction task.
+Welcome to the documentation for **MLOps Labs** — a modular, production-ready machine learning pipeline for the Titanic survival prediction task.
 
-Built as part of the **ITI MLOps Course — Lab 0**.
+Built as part of the **ITI MLOps Course**.
 
 ---
 
@@ -13,7 +13,7 @@ Built as part of the **ITI MLOps Course — Lab 0**.
 - **Weights & Biases integration** — optional experiment tracking
 - **Data validation tests** — pipeline stops if data quality checks fail
 - **Colored logging** — centralized logger with color-coded log levels
-- **Config-driven** — all settings controlled via `config.yaml`
+- **Hydra config management** — all settings in `config.yaml` with CLI overrides
 - **CLI inference** — predict on new data with one command
 
 ---
@@ -24,7 +24,7 @@ Built as part of the **ITI MLOps Course — Lab 0**.
 |---------|-------------|
 | [Getting Started](getting-started.md) | Installation, setup, and first run |
 | [Pipeline Overview](pipeline.md) | Step-by-step pipeline flow |
-| [Configuration](configuration.md) | `config.yaml` reference |
+| [Configuration](configuration.md) | Hydra config, CLI overrides, environment variables |
 | [API Reference](api/config.md) | Module and function documentation |
 | [Data Validation Tests](tests.md) | Test descriptions and usage |
 
@@ -38,6 +38,7 @@ Built as part of the **ITI MLOps Course — Lab 0**.
 | XGBoost | Gradient boosting classifier |
 | CatBoost | Categorical-aware boosting |
 | Optuna | Hyperparameter optimization |
+| Hydra | Configuration management with CLI overrides |
 | Weights & Biases | Experiment tracking (optional) |
 | pytest | Data validation testing |
 | MKDocs | Project documentation |

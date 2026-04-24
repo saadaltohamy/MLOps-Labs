@@ -61,8 +61,9 @@ This installs all required packages defined in `pyproject.toml`, including:
 
 - scikit-learn, XGBoost, CatBoost
 - Optuna + optuna-integration[wandb]
+- Hydra (configuration management)
 - pandas, matplotlib, seaborn
-- pytest, python-dotenv, pyyaml
+- pytest, python-dotenv
 
 ---
 
@@ -119,9 +120,26 @@ python src/inference.py --input data/raw/test.csv --output reports/predictions.c
 Each module can be run independently:
 
 ```bash
-python src/download_data.py       # Step 1: Download data
-python src/preprocess.py          # Step 2: Preprocess
+python -m src.download_data       # Step 1: Download data
+python -m src.preprocess           # Step 2: Preprocess
 python -m pytest tests/test_data.py -v  # Step 3: Validate
-python src/train.py               # Step 4: Train
-python src/test_model.py          # Step 5: Test
+python -m src.train                # Step 4: Train
+python -m src.test_model           # Step 5: Test
 ```
+
+### Using CLI Overrides (Hydra)
+
+Override any config value without editing `config.yaml`:
+
+```bash
+# Quick run with 5 trials instead of 30
+python -m src.train training.n_trials=5
+
+# Override multiple values
+python -m src.train training.n_trials=50 training.cv_folds=10
+
+# Change split ratio
+python -m src.preprocess preprocessing.test_size=0.3
+```
+
+See [Configuration](configuration.md) for full override syntax and examples.
