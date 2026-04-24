@@ -70,6 +70,10 @@
     <li class="toctree-l2"><a class="reference internal" href="#6-run-inference">6. Run Inference</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#running-individual-steps">Running Individual Steps</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#using-cli-overrides-hydra">Using CLI Overrides (Hydra)</a>
+    </li>
+        </ul>
     </li>
     </ul>
                 </li>
@@ -165,8 +169,9 @@ pip install -e .
 <ul>
 <li>scikit-learn, XGBoost, CatBoost</li>
 <li>Optuna + optuna-integration[wandb]</li>
+<li>Hydra (configuration management)</li>
 <li>pandas, matplotlib, seaborn</li>
-<li>pytest, python-dotenv, pyyaml</li>
+<li>pytest, python-dotenv</li>
 </ul>
 <hr />
 <h2 id="4-set-up-environment-variables">4. Set Up Environment Variables<a class="headerlink" href="#4-set-up-environment-variables" title="Permanent link">&para;</a></h2>
@@ -204,12 +209,24 @@ WANDB_PROJECT=mlops-lab0
 <hr />
 <h2 id="running-individual-steps">Running Individual Steps<a class="headerlink" href="#running-individual-steps" title="Permanent link">&para;</a></h2>
 <p>Each module can be run independently:</p>
-<pre><code class="language-bash">python src/download_data.py       # Step 1: Download data
-python src/preprocess.py          # Step 2: Preprocess
+<pre><code class="language-bash">python -m src.download_data       # Step 1: Download data
+python -m src.preprocess           # Step 2: Preprocess
 python -m pytest tests/test_data.py -v  # Step 3: Validate
-python src/train.py               # Step 4: Train
-python src/test_model.py          # Step 5: Test
+python -m src.train                # Step 4: Train
+python -m src.test_model           # Step 5: Test
 </code></pre>
+<h3 id="using-cli-overrides-hydra">Using CLI Overrides (Hydra)<a class="headerlink" href="#using-cli-overrides-hydra" title="Permanent link">&para;</a></h3>
+<p>Override any config value without editing <code>config.yaml</code>:</p>
+<pre><code class="language-bash"># Quick run with 5 trials instead of 30
+python -m src.train training.n_trials=5
+
+# Override multiple values
+python -m src.train training.n_trials=50 training.cv_folds=10
+
+# Change split ratio
+python -m src.preprocess preprocessing.test_size=0.3
+</code></pre>
+<p>See <a href="../configuration/">Configuration</a> for full override syntax and examples.</p>
               
             </div>
           </div><footer>

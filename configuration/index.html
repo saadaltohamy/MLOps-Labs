@@ -57,19 +57,35 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">Configuration</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#how-it-works">How It Works</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#full-configuration-reference">Full Configuration Reference</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#cli-overrides">CLI Overrides</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#basic-overrides">Basic Overrides</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#nested-key-syntax">Nested Key Syntax</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#override-lists">Override Lists</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#override-examples-by-pipeline-step">Override Examples by Pipeline Step</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#environment-variables">Environment Variables</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#customizing-the-pipeline">Customizing the Pipeline</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#change-the-number-of-optuna-trials">Change the number of Optuna trials</a>
+    <li class="toctree-l3"><a class="reference internal" href="#quick-experiments-via-cli-no-file-changes-needed">Quick experiments via CLI (no file changes needed)</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#change-the-trainvalidation-split-ratio">Change the train/validation split ratio</a>
+    <li class="toctree-l3"><a class="reference internal" href="#permanent-changes-via-configyaml">Permanent changes via config.yaml</a>
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#add-or-remove-features">Add or remove features</a>
     </li>
         </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#how-config-loading-works-internally">How Config Loading Works Internally</a>
     </li>
     </ul>
                 </li>
@@ -119,7 +135,21 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h1>
-<p>All pipeline settings are controlled via the <code>config.yaml</code> file at the project root.</p>
+<p>All pipeline settings are managed via <a href="https://hydra.cc/">Hydra</a> — a powerful configuration framework by Meta Research. The project uses Hydra's <strong>Compose API</strong> to load <code>config.yaml</code> at the project root, with full support for <strong>CLI overrides</strong> so you can tweak any setting without editing files.</p>
+<hr />
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
+<p>The <code>src/config.py</code> module uses Hydra's Compose API (<code>initialize_config_dir</code> + <code>compose</code>) instead of the <code>@hydra.main</code> decorator. This allows:</p>
+<ul>
+<li><strong>Module-level config</strong> — <code>CONFIG</code> is loaded once at import time and shared across all pipeline modules</li>
+<li><strong>CLI overrides</strong> — any <code>key=value</code> argument passed on the command line automatically overrides the corresponding config value</li>
+<li><strong>No Hydra side-effects</strong> — no <code>outputs/</code> directory, no <code>.hydra/</code> folder, no working directory changes</li>
+</ul>
+<pre><code class="language-python">from src.config import CONFIG, resolve_path
+
+# Access any config value
+n_trials = CONFIG[&quot;training&quot;][&quot;n_trials&quot;]
+train_csv = resolve_path(CONFIG[&quot;data&quot;][&quot;train_csv&quot;])
+</code></pre>
 <hr />
 <h2 id="full-configuration-reference">Full Configuration Reference<a class="headerlink" href="#full-configuration-reference" title="Permanent link">&para;</a></h2>
 <pre><code class="language-yaml">data:
@@ -165,8 +195,64 @@ models:
   dir: &quot;models&quot;                        # Models output directory
 </code></pre>
 <hr />
+<h2 id="cli-overrides">CLI Overrides<a class="headerlink" href="#cli-overrides" title="Permanent link">&para;</a></h2>
+<p>You can override <strong>any</strong> config value from the command line using Hydra's <code>key=value</code> syntax — no need to edit <code>config.yaml</code>:</p>
+<h3 id="basic-overrides">Basic Overrides<a class="headerlink" href="#basic-overrides" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash"># Change number of Optuna trials
+python -m src.train training.n_trials=5
+
+# Change validation split ratio
+python -m src.preprocess preprocessing.test_size=0.3
+
+# Override multiple values at once
+python -m src.train training.n_trials=50 training.cv_folds=10
+
+# Change model output path
+python -m src.train training.model_path=&quot;models/experiment_v2.pkl&quot;
+</code></pre>
+<h3 id="nested-key-syntax">Nested Key Syntax<a class="headerlink" href="#nested-key-syntax" title="Permanent link">&para;</a></h3>
+<p>Use dot notation to reach nested config values:</p>
+<pre><code class="language-bash"># Override the raw data directory
+python -m src.download_data data.raw_dir=&quot;data/custom_raw&quot;
+
+# Override the study name
+python -m src.train training.study_name=&quot;my_custom_study&quot;
+</code></pre>
+<h3 id="override-lists">Override Lists<a class="headerlink" href="#override-lists" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash"># Override numeric features
+python -m src.preprocess 'preprocessing.numeric_features=[&quot;Age&quot;, &quot;Fare&quot;]'
+</code></pre>
+<hr />
+<h2 id="override-examples-by-pipeline-step">Override Examples by Pipeline Step<a class="headerlink" href="#override-examples-by-pipeline-step" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Example Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Download</strong></td>
+<td><code>python -m src.download_data data.raw_dir="data/custom"</code></td>
+</tr>
+<tr>
+<td><strong>Preprocess</strong></td>
+<td><code>python -m src.preprocess preprocessing.test_size=0.3</code></td>
+</tr>
+<tr>
+<td><strong>Train</strong></td>
+<td><code>python -m src.train training.n_trials=50 training.cv_folds=10</code></td>
+</tr>
+<tr>
+<td><strong>Test</strong></td>
+<td><code>python -m src.test_model training.model_path="models/experiment.pkl"</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
-<p>Environment variables are loaded from the <code>.env</code> file at the project root.</p>
+<p>Environment variables are loaded from the <code>.env</code> file at the project root. These are <strong>separate from Hydra config</strong> and control external service credentials.</p>
 <table>
 <thead>
 <tr>
@@ -206,14 +292,17 @@ cp .env.example .env</code></p>
 </div>
 <hr />
 <h2 id="customizing-the-pipeline">Customizing the Pipeline<a class="headerlink" href="#customizing-the-pipeline" title="Permanent link">&para;</a></h2>
-<h3 id="change-the-number-of-optuna-trials">Change the number of Optuna trials<a class="headerlink" href="#change-the-number-of-optuna-trials" title="Permanent link">&para;</a></h3>
-<p>Edit <code>config.yaml</code>:</p>
+<h3 id="quick-experiments-via-cli-no-file-changes-needed">Quick experiments via CLI (no file changes needed)<a class="headerlink" href="#quick-experiments-via-cli-no-file-changes-needed" title="Permanent link">&para;</a></h3>
+<pre><code class="language-bash"># Fast trial run — 5 trials, 3 folds
+python -m src.train training.n_trials=5 training.cv_folds=3
+
+# Full production run — 100 trials, 10 folds
+python -m src.train training.n_trials=100 training.cv_folds=10
+</code></pre>
+<h3 id="permanent-changes-via-configyaml">Permanent changes via <code>config.yaml</code><a class="headerlink" href="#permanent-changes-via-configyaml" title="Permanent link">&para;</a></h3>
+<p>Edit <code>config.yaml</code> directly for changes you want to persist:</p>
 <pre><code class="language-yaml">training:
   n_trials: 50  # Increase for more thorough search
-</code></pre>
-<h3 id="change-the-trainvalidation-split-ratio">Change the train/validation split ratio<a class="headerlink" href="#change-the-trainvalidation-split-ratio" title="Permanent link">&para;</a></h3>
-<pre><code class="language-yaml">preprocessing:
-  test_size: 0.3  # 70/30 split instead of 80/20
 </code></pre>
 <h3 id="add-or-remove-features">Add or remove features<a class="headerlink" href="#add-or-remove-features" title="Permanent link">&para;</a></h3>
 <pre><code class="language-yaml">preprocessing:
@@ -223,6 +312,30 @@ cp .env.example .env</code></p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>If you modify feature lists, make sure the corresponding columns exist in the raw CSV, and re-run preprocessing before training.</p>
+</div>
+<hr />
+<h2 id="how-config-loading-works-internally">How Config Loading Works Internally<a class="headerlink" href="#how-config-loading-works-internally" title="Permanent link">&para;</a></h2>
+<pre><code>┌─────────────────────────────────────────────────┐
+│           python -m src.train                    │
+│               training.n_trials=5                │
+├─────────────────────────────────────────────────┤
+│                                                  │
+│  1. src/config.py is imported                    │
+│  2. get_project_root() finds config.yaml         │
+│  3. _parse_cli_overrides() extracts              │
+│     [&quot;training.n_trials=5&quot;] from sys.argv        │
+│  4. Hydra compose() loads config.yaml            │
+│     and applies the overrides                    │
+│  5. CONFIG dict is available globally            │
+│                                                  │
+│  Result: CONFIG[&quot;training&quot;][&quot;n_trials&quot;] == 5     │
+│          (instead of the default 30)             │
+│                                                  │
+└─────────────────────────────────────────────────┘
+</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Config is loaded <strong>once at import time</strong> (<code>CONFIG = load_config()</code> at module level). All modules that import <code>CONFIG</code> share the same overridden values for that process run.</p>
 </div>
               
             </div>
