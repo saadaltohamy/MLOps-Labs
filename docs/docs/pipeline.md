@@ -8,7 +8,7 @@ The Titanic ML pipeline is a sequential workflow that automates the full machine
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│                    run_pipeline.sh                            │
+│                    run_pipeline.sh                           │
 ├──────────────────────────────────────────────────────────────┤
 │                                                              │
 │  Step 1: download_data.py                                    │
@@ -37,7 +37,7 @@ The Titanic ML pipeline is a sequential workflow that automates the full machine
 │  ├─ Load processed data + preprocessing pipelines            │
 │  ├─ Run Optuna study (n_trials from config)                  │
 │  ├─ Search across 6 model families:                          │
-│  │   RF, ExtraTrees, GBT, HistGBT, XGBoost, CatBoost        │
+│  │   RF, ExtraTrees, GBT, HistGBT, XGBoost, CatBoost         │
 │  ├─ 5-fold StratifiedKFold cross-validation                  │
 │  ├─ Optional: log to Weights & Biases                        │
 │  ├─ Retrain best model on full training set                  │
