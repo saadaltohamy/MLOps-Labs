@@ -78,8 +78,8 @@ MLOps-Labs/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/saadaltohamy/mlops-lab0.git
-cd mlops-lab0
+git clone https://github.com/saadaltohamy/MLOps-Labs.git
+cd MLOps-Labs
 ```
 
 ### 2. Install uv (recommended)
