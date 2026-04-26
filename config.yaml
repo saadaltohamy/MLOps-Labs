@@ -14,14 +14,15 @@ preprocessing:
   pipeline_path: "models/preprocessing_pipeline.pkl"
 
 training:
-  n_trials: 30
+  n_trials: 5
   cv_folds: 5
   random_state: 42
   model_path: "models/best_model.pkl"
-  study_name: "titanic_tree_search"
+  study_name: "titanic_best_accuracy_model-signature"
 
 reports:
   dir: "reports"
+  train_metrics_file: "reports/train_metrics.json"
   metrics_file: "reports/metrics.json"
   optuna_top10_chart: "reports/figures/optuna_top10_accuracy.png"
 

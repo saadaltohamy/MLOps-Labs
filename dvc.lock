@@ -1,0 +1,301 @@
+schema: '2.0'
+stages:
+  download:
+    cmd: python src/download_data.py
+    deps:
+    - path: src/config.py
+      hash: md5
+      md5: af39ff22b2db97c6165bc27850dfbda4
+      size: 1723
+      isexec: true
+    - path: src/download_data.py
+      hash: md5
+      md5: 4d6a88125e303be06c6af2975eeec099
+      size: 1686
+      isexec: true
+    - path: src/logger.py
+      hash: md5
+      md5: 9af0901ea563912e613d478d55a77708
+      size: 1902
+      isexec: true
+    params:
+      config.yaml:
+        data.raw_dir: data/raw
+        data.test_csv: data/raw/test.csv
+        data.train_csv: data/raw/train.csv
+    outs:
+    - path: data/raw/test.csv
+      hash: md5
+      md5: 7533b82eae4b582610cbd68aa636b017
+      size: 28629
+      isexec: true
+    - path: data/raw/train.csv
+      hash: md5
+      md5: 2309cc5f04782ed9bb6016d9f4e381cf
+      size: 61194
+      isexec: true
+  preprocess:
+    cmd: python src/preprocess.py
+    deps:
+    - path: data/raw/test.csv
+      hash: md5
+      md5: 7533b82eae4b582610cbd68aa636b017
+      size: 28629
+      isexec: true
+    - path: data/raw/train.csv
+      hash: md5
+      md5: 2309cc5f04782ed9bb6016d9f4e381cf
+      size: 61194
+      isexec: true
+    - path: src/config.py
+      hash: md5
+      md5: af39ff22b2db97c6165bc27850dfbda4
+      size: 1723
+      isexec: true
+    - path: src/logger.py
+      hash: md5
+      md5: 9af0901ea563912e613d478d55a77708
+      size: 1902
+      isexec: true
+    - path: src/preprocess.py
+      hash: md5
+      md5: 4fe6670fc50abb3b493235086fb9f67a
+      size: 5516
+      isexec: true
+    params:
+      config.yaml:
+        data.processed_dir: data/processed
+        preprocessing.categorical_features:
+        - Pclass
+        - Sex
+        - Embarked
+        preprocessing.dropped_columns:
+        - Cabin
+        - PassengerId
+        - Ticket
+        - Name
+        - Survived
+        preprocessing.numeric_features:
+        - Age
+        - SibSp
+        - Parch
+        - Fare
+        preprocessing.pipeline_path: models/preprocessing_pipeline.pkl
+        preprocessing.random_state: 42
+        preprocessing.target_column: Survived
+        preprocessing.test_size: 0.2
+    outs:
+    - path: data/processed/X_test_competition.csv
+      hash: md5
+      md5: bdb3f5d55c7007876f5e4a7b43bbbd51
+      size: 10091
+      isexec: true
+    - path: data/processed/X_train.csv
+      hash: md5
+      md5: dd4249aed822fd9753975ad45bc210b2
+      size: 17151
+      isexec: true
+    - path: data/processed/X_valid.csv
+      hash: md5
+      md5: fe8a37ac9b53251aa112d16ab0f8b271
+      size: 4281
+      isexec: true
+    - path: data/processed/test_passenger_ids.csv
+      hash: md5
+      md5: b27a46f3fbc05625cc999192fb885489
+      size: 1994
+      isexec: true
+    - path: data/processed/y_train.csv
+      hash: md5
+      md5: 14c8473b5dfd3dd472cb95fb7421d712
+      size: 1433
+      isexec: true
+    - path: data/processed/y_valid.csv
+      hash: md5
+      md5: 0e0877b08907ba7b4d335476eda87862
+      size: 367
+      isexec: true
+    - path: models/preprocessing_pipeline.pkl
+      hash: md5
+      md5: 91988ca9324abc178be2f31962649e81
+      size: 3255
+      isexec: true
+  validate:
+    cmd: python -m pytest tests/test_data.py -v
+    deps:
+    - path: data/processed/X_test_competition.csv
+      hash: md5
+      md5: bdb3f5d55c7007876f5e4a7b43bbbd51
+      size: 10091
+      isexec: true
+    - path: data/processed/X_train.csv
+      hash: md5
+      md5: dd4249aed822fd9753975ad45bc210b2
+      size: 17151
+      isexec: true
+    - path: data/processed/X_valid.csv
+      hash: md5
+      md5: fe8a37ac9b53251aa112d16ab0f8b271
+      size: 4281
+      isexec: true
+    - path: data/processed/test_passenger_ids.csv
+      hash: md5
+      md5: b27a46f3fbc05625cc999192fb885489
+      size: 1994
+      isexec: true
+    - path: data/processed/y_train.csv
+      hash: md5
+      md5: 14c8473b5dfd3dd472cb95fb7421d712
+      size: 1433
+      isexec: true
+    - path: data/processed/y_valid.csv
+      hash: md5
+      md5: 0e0877b08907ba7b4d335476eda87862
+      size: 367
+      isexec: true
+    - path: models/preprocessing_pipeline.pkl
+      hash: md5
+      md5: 91988ca9324abc178be2f31962649e81
+      size: 3255
+      isexec: true
+    - path: src/config.py
+      hash: md5
+      md5: af39ff22b2db97c6165bc27850dfbda4
+      size: 1723
+      isexec: true
+    - path: tests/test_data.py
+      hash: md5
+      md5: 3398f6b57796b5eafb4157e06c124b39
+      size: 4917
+      isexec: true
+    params:
+      config.yaml:
+        data.processed_dir: data/processed
+        preprocessing.categorical_features:
+        - Pclass
+        - Sex
+        - Embarked
+        preprocessing.numeric_features:
+        - Age
+        - SibSp
+        - Parch
+        - Fare
+        preprocessing.pipeline_path: models/preprocessing_pipeline.pkl
+        preprocessing.test_size: 0.2
+  train:
+    cmd: python src/train.py
+    deps:
+    - path: data/processed/X_train.csv
+      hash: md5
+      md5: dd4249aed822fd9753975ad45bc210b2
+      size: 17151
+      isexec: true
+    - path: data/processed/y_train.csv
+      hash: md5
+      md5: 14c8473b5dfd3dd472cb95fb7421d712
+      size: 1433
+      isexec: true
+    - path: models/preprocessing_pipeline.pkl
+      hash: md5
+      md5: 91988ca9324abc178be2f31962649e81
+      size: 3255
+      isexec: true
+    - path: src/config.py
+      hash: md5
+      md5: af39ff22b2db97c6165bc27850dfbda4
+      size: 1723
+      isexec: true
+    - path: src/logger.py
+      hash: md5
+      md5: 9af0901ea563912e613d478d55a77708
+      size: 1902
+      isexec: true
+    - path: src/train.py
+      hash: md5
+      md5: 2c7446250ed8ae6fcdc5a844d98efcf5
+      size: 24800
+      isexec: true
+    params:
+      config.yaml:
+        data.processed_dir: data/processed
+        preprocessing.pipeline_path: models/preprocessing_pipeline.pkl
+        reports.dir: reports
+        reports.optuna_top10_chart: reports/figures/optuna_top10_accuracy.png
+        reports.train_metrics_file: reports/train_metrics.json
+        training.cv_folds: 5
+        training.model_path: models/best_model.pkl
+        training.n_trials: 5
+        training.random_state: 42
+        training.study_name: titanic_best_accuracy_model-signature
+    outs:
+    - path: models/best_model.pkl
+      hash: md5
+      md5: 429dada0c1e8affb97f2897b40df8083
+      size: 702990
+      isexec: true
+    - path: reports/figures/optuna_top10_accuracy.png
+      hash: md5
+      md5: a58e852cf07953d375f882a38b37426f
+      size: 38292
+      isexec: true
+    - path: reports/train_metrics.json
+      hash: md5
+      md5: 688bb099572ad46808064e0fcecc7804
+      size: 409
+      isexec: true
+  evaluate:
+    cmd: python src/test_model.py
+    deps:
+    - path: data/processed/X_valid.csv
+      hash: md5
+      md5: fe8a37ac9b53251aa112d16ab0f8b271
+      size: 4281
+      isexec: true
+    - path: data/processed/y_valid.csv
+      hash: md5
+      md5: 0e0877b08907ba7b4d335476eda87862
+      size: 367
+      isexec: true
+    - path: models/best_model.pkl
+      hash: md5
+      md5: 429dada0c1e8affb97f2897b40df8083
+      size: 702990
+      isexec: true
+    - path: models/preprocessing_pipeline.pkl
+      hash: md5
+      md5: 91988ca9324abc178be2f31962649e81
+      size: 3255
+      isexec: true
+    - path: reports/train_metrics.json
+      hash: md5
+      md5: 688bb099572ad46808064e0fcecc7804
+      size: 409
+      isexec: true
+    - path: src/config.py
+      hash: md5
+      md5: af39ff22b2db97c6165bc27850dfbda4
+      size: 1723
+      isexec: true
+    - path: src/logger.py
+      hash: md5
+      md5: 9af0901ea563912e613d478d55a77708
+      size: 1902
+      isexec: true
+    - path: src/test_model.py
+      hash: md5
+      md5: 7cac8374dd20202b654c13d31b58e918
+      size: 3156
+      isexec: true
+    params:
+      config.yaml:
+        data.processed_dir: data/processed
+        preprocessing.pipeline_path: models/preprocessing_pipeline.pkl
+        reports.metrics_file: reports/metrics.json
+        reports.train_metrics_file: reports/train_metrics.json
+        training.model_path: models/best_model.pkl
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: 08cf2ecd08e61f170fe1c1937aa96370
+      size: 497
+      isexec: true

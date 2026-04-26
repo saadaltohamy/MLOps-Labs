@@ -78,12 +78,13 @@ def run_testing() -> None:
     logger.info(f"Validation ROC-AUC:  {roc_auc:.4f}")
 
     # --- Save/update metrics ---
+    train_metrics_file = resolve_path(cfg_reports["train_metrics_file"])
     metrics_file = resolve_path(cfg_reports["metrics_file"])
     metrics_file.parent.mkdir(parents=True, exist_ok=True)
 
-    # Load existing metrics if present
-    if metrics_file.exists():
-        with open(metrics_file, "r") as f:
+    # Start from training metrics so DVC can safely recreate the final metrics file.
+    if train_metrics_file.exists():
+        with open(train_metrics_file, "r") as f:
             metrics = json.load(f)
     else:
         metrics = {}

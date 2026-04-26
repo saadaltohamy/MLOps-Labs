@@ -3,9 +3,9 @@ Training module:
   - Loads preprocessed data and preprocessing pipelines from pickle
   - Runs Optuna hyperparameter optimization across multiple model families
   - Saves the best model to pickle
-  - Outputs metrics (accuracy, roc_auc) to reports/metrics.json
+  - Outputs metrics (accuracy, roc_auc) to reports/train_metrics.json
   - Generates a bar chart of top-10 trials by accuracy
-  - Optionally logs to Weights & Biases if WANDB_API_KEY is set
+  - Optionally logs Optuna trials to Weights & Biases and MLflow
 """
 
 import json
@@ -13,6 +13,7 @@ import os
 import pickle
 import sys
 from pathlib import Path
+from typing import Any
 
 import matplotlib
 matplotlib.use("Agg")  # non-interactive backend for server/CI environments
@@ -22,6 +23,7 @@ import numpy as np
 import optuna
 import pandas as pd
 import wandb
+import mlflow
 from catboost import CatBoostClassifier
 from dotenv import load_dotenv
 from optuna.integration import WeightsAndBiasesCallback
@@ -319,6 +321,104 @@ def _init_wandb_if_available():
     return wandb
 
 
+def _init_mlflow_if_available(study_name: str):
+    """Return MLflow module, callback, and experiment id if enabled."""
+    tracking_uri = os.environ.get("MLFLOW_TRACKING_URI")
+    if not tracking_uri:
+        logger.warning("MLFLOW_TRACKING_URI not set - skipping MLflow logging.")
+        return None, None, None
+
+    import mlflow
+    from optuna.integration import MLflowCallback
+
+    mlflow.set_tracking_uri(tracking_uri)
+
+    experiment = mlflow.get_experiment_by_name(study_name)
+    experiment_id = experiment.experiment_id if experiment is not None else None
+
+    if experiment_id is None:
+        try:
+            experiment_id = mlflow.create_experiment(study_name)
+            logger.info(f"Created MLflow experiment '{study_name}'.")
+        except Exception as exc:
+            logger.warning(
+                "MLflow experiment '%s' is unavailable and could not be created: %s. "
+                "Skipping MLflow logging.",
+                study_name,
+                exc,
+            )
+            return None, None, None
+
+    mlflow.set_experiment(experiment_id=experiment_id)
+    logger.info(f"Using MLflow experiment '{study_name}' ({experiment_id}).")
+
+    logger.info(f"MLflow tracking enabled: {tracking_uri}")
+    callback = MLflowCallback(
+        tracking_uri=tracking_uri,
+        metric_name="accuracy",
+        create_experiment=False,
+        mlflow_kwargs={"experiment_id": experiment_id, "nested": True},
+    )
+    return mlflow, callback, experiment_id
+
+
+def _log_best_model_run(
+    mlflow_mod,
+    experiment_id: str,
+    study_name: str,
+    best_trial_number: int,
+    best_params_full: dict,
+    metrics: dict,
+    model_name: str,
+    best_model,
+    model_path: Path,
+    metrics_file: Path,
+    chart_path: Path,
+    X_train: pd.DataFrame,
+    X_train_catboost: pd.DataFrame
+) -> None:
+    """Log the selected best model and final artifacts in a dedicated MLflow run."""
+    from mlflow.models import infer_signature
+    numeric_metrics = {
+        key: value for key, value in metrics.items() if isinstance(value, (int, float))
+    }
+    extra_params = {
+        "best_model": metrics.get("best_model", model_name),
+        "n_trials": metrics.get("n_trials"),
+    }
+
+    with mlflow_mod.start_run(experiment_id=experiment_id, run_name="best_model"):
+        mlflow_mod.set_tags(
+            {
+                "study_name": study_name,
+                "best_trial_number": str(best_trial_number),
+                "model_name": model_name,
+            }
+        )
+        mlflow_mod.log_params(best_params_full)
+        mlflow_mod.log_params({k: str(v) for k, v in extra_params.items() if v is not None})
+        mlflow_mod.log_metrics(numeric_metrics)
+        mlflow_mod.log_artifact(str(model_path), artifact_path="artifacts")
+        mlflow_mod.log_artifact(str(metrics_file), artifact_path="artifacts")
+        mlflow_mod.log_artifact(str(chart_path), artifact_path="artifacts")
+
+        if model_name == "catboost":
+            import mlflow.catboost
+            
+            signature = infer_signature(
+                X_train_catboost.sample(5), 
+                best_model.predict(X_train_catboost.sample(5))
+            )
+            mlflow.catboost.log_model(best_model, artifact_path="model", signature=signature)
+        else:
+            import mlflow.sklearn
+            signature = infer_signature(
+                X_train.sample(5), 
+                best_model.predict(X_train.sample(5))
+            )
+            mlflow.sklearn.log_model(best_model, artifact_path="model", signature=signature)
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -332,7 +432,9 @@ def run_training() -> None:
     # --- Load processed data ---
     processed_dir = resolve_path(cfg_data["processed_dir"])
     X_train = pd.read_csv(processed_dir / "X_train.csv")
+    X_valid = pd.read_csv(processed_dir / "X_valid.csv")
     y_train = pd.read_csv(processed_dir / "y_train.csv").squeeze()
+    y_valid = pd.read_csv(processed_dir / "y_valid.csv").squeeze()
 
     # --- Load preprocessing pipelines ---
     pipeline_path = resolve_path(cfg_preprocess["pipeline_path"])
@@ -359,10 +461,14 @@ def run_training() -> None:
     wandb_callback = None
     if wandb_mod is not None:
         wandb_callback = WeightsAndBiasesCallback(
-            metric_name="roc_auc",
+            metric_name="accuracy",
             as_multirun=True,
             wandb_kwargs={"project": os.getenv("WANDB_PROJECT", "mlops-lab0")},
         )
+
+    mlflow_mod, mlflow_callback, mlflow_experiment_id = _init_mlflow_if_available(
+        cfg_train["study_name"]
+    )
 
     # --- Optuna objective ---
     def objective(trial: optuna.Trial) -> float:
@@ -379,6 +485,15 @@ def run_training() -> None:
         )
 
         fold_scores = []
+        if mlflow_mod is not None:
+            mlflow_mod.log_params(
+                {
+                    "cv_folds": cv_folds,
+                    "training_random_state": random_state,
+                    "training_rows": len(search_train),
+                }
+            )
+
         for fold_idx, (train_idx, valid_idx) in enumerate(
             cv.split(search_train, y_train), start=1
         ):
@@ -389,25 +504,39 @@ def run_training() -> None:
             y_fold_valid = y_train.iloc[valid_idx]
 
             estimator_fold.fit(X_fold_train, y_fold_train, **fit_kwargs)
-            y_valid_proba = estimator_fold.predict_proba(X_fold_valid)[:, 1]
-            fold_score = roc_auc_score(y_fold_valid, y_valid_proba)
+            y_valid_pred = estimator_fold.predict(X_fold_valid)
+            fold_score = accuracy_score(y_fold_valid, y_valid_pred)
             fold_scores.append(fold_score)
+            if mlflow_mod is not None:
+                mlflow_mod.log_metric(f"fold_{fold_idx}_accuracy", fold_score)
             trial.report(float(np.mean(fold_scores)), step=fold_idx)
 
-        return float(np.mean(fold_scores))
+        mean_accuracy = float(np.mean(fold_scores))
+        std_accuracy = float(np.std(fold_scores))
 
+        if mlflow_mod is not None:
+            mlflow_mod.log_metric("cv_mean_accuracy", mean_accuracy)
+            mlflow_mod.log_metric("cv_std_accuracy", std_accuracy)
+
+        return mean_accuracy
+
+    objective_fn = objective
+    if mlflow_callback is not None:
+        objective_fn = mlflow_callback.track_in_mlflow()(objective_fn)
     # --- Run study ---
     study = optuna.create_study(
         study_name=cfg_train["study_name"],
         direction="maximize",
     )
 
-    callbacks = []
+    callbacks: list[Any] = []
     if wandb_callback is not None:
         callbacks.append(wandb_callback)
+    if mlflow_callback is not None:
+        callbacks.append(mlflow_callback)
 
     logger.info(f"Starting Optuna study with {n_trials} trials ...")
-    study.optimize(objective, n_trials=n_trials, callbacks=callbacks)
+    study.optimize(objective_fn, n_trials=n_trials, callbacks=callbacks)
 
     # --- Retrain best model on full training set ---
     best_params = study.best_trial.params
@@ -423,20 +552,24 @@ def run_training() -> None:
             clean_key = key
         best_params_full[clean_key] = value
 
-    best_model, best_X_train, best_fit_kwargs = build_model_from_params(
+    X_full = pd.concat([X_train, X_valid], ignore_index=True)
+    y_full = pd.concat([y_train, y_valid], ignore_index=True)
+    X_full_catboost = prepare_catboost_frame(X_full, categorical_features)
+
+    best_model, best_X_full, best_fit_kwargs = build_model_from_params(
         best_params_full,
         onehot_preprocessor,
         hist_preprocessor,
         scale_pos_weight,
         hist_categorical_feature_idx,
         categorical_features,
-        X_train,
-        X_train_catboost,
+        X_full,
+        X_full_catboost,
     )
-    logger.info(f"Best trial: {study.best_trial.number} | ROC-AUC: {study.best_value:.4f}")
+    logger.info(f"Best trial: {study.best_trial.number} | Accuracy: {study.best_value:.4f}")
     logger.info(f"Best params: {best_params_full}")
 
-    best_model.fit(best_X_train, y_train, **best_fit_kwargs)
+    best_model.fit(best_X_full, y_full, **best_fit_kwargs)
 
     # --- Save best model ---
     model_path = resolve_path(cfg_train["model_path"])
@@ -445,7 +578,7 @@ def run_training() -> None:
     model_bundle = {
         "model": best_model,
         "model_name": best_params_full["model_name"],
-        "best_roc_auc_cv": study.best_value,
+        "best_cv_accuracy": study.best_value,
         "best_params": best_params_full,
     }
     with open(model_path, "wb") as f:
@@ -455,26 +588,26 @@ def run_training() -> None:
     # --- Save metrics ---
     reports_dir = resolve_path(cfg_reports["dir"])
     reports_dir.mkdir(parents=True, exist_ok=True)
-    metrics_file = resolve_path(cfg_reports["metrics_file"])
+    metrics_file = resolve_path(cfg_reports["train_metrics_file"])
 
     # Compute training accuracy
-    y_train_pred = best_model.predict(best_X_train)
-    train_accuracy = float(accuracy_score(y_train, y_train_pred))
+    y_train_pred = best_model.predict(best_X_full)
+    train_accuracy = float(accuracy_score(y_full, y_train_pred))
     train_roc_auc = float(
-        roc_auc_score(y_train, best_model.predict_proba(best_X_train)[:, 1])
+        roc_auc_score(y_full, best_model.predict_proba(best_X_full)[:, 1])
     )
 
     metrics = {
         "train_accuracy": train_accuracy,
         "train_roc_auc": train_roc_auc,
-        "best_cv_roc_auc": study.best_value,
+        "best_cv_accuracy": study.best_value,
         "best_model": best_params_full["model_name"],
         "best_params": {k: v for k, v in best_params_full.items() if k != "model_name"},
         "n_trials": n_trials,
     }
     with open(metrics_file, "w") as f:
         json.dump(metrics, f, indent=2, default=str)
-    logger.info(f"Metrics saved to {metrics_file}")
+    logger.info(f"Training metrics saved to {metrics_file}")
 
     # --- Generate top-10 trials chart ---
     chart_path = resolve_path(cfg_reports["optuna_top10_chart"])
@@ -489,8 +622,8 @@ def run_training() -> None:
         top10["value"],
         color="#4C72B0",
     )
-    ax.set_xlabel("ROC-AUC (CV)")
-    ax.set_title("Top 10 Optuna Trials by ROC-AUC")
+    ax.set_xlabel("Accuracy (CV)")
+    ax.set_title("Top 10 Optuna Trials by Accuracy")
     ax.invert_yaxis()
     for bar, val in zip(bars, top10["value"]):
         ax.text(bar.get_width() + 0.002, bar.get_y() + bar.get_height() / 2,
@@ -499,6 +632,24 @@ def run_training() -> None:
     fig.savefig(chart_path, dpi=150)
     plt.close(fig)
     logger.info(f"Top-10 chart saved to {chart_path}")
+
+    if mlflow_mod is not None and mlflow_experiment_id is not None:
+        _log_best_model_run(
+            mlflow_mod=mlflow_mod,
+            experiment_id=mlflow_experiment_id,
+            study_name=cfg_train["study_name"],
+            best_trial_number=study.best_trial.number,
+            best_params_full=best_params_full,
+            metrics=metrics,
+            model_name=best_params_full["model_name"],
+            best_model=best_model,
+            model_path=model_path,
+            metrics_file=metrics_file,
+            chart_path=chart_path,
+            X_train=X_full,
+            X_train_catboost=X_full_catboost,
+        )
+        logger.info("Logged best_model run to MLflow.")
 
     # --- Finalize wandb ---
     if wandb_mod is not None:

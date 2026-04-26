@@ -9,6 +9,8 @@ This guide walks you through setting up and running the Titanic ML pipeline from
 - **Python 3.12+**
 - A **Kaggle account** with an API key ([how to get one](https://www.kaggle.com/docs/api))
 - *(Optional)* A **Weights & Biases** account for experiment tracking
+- *(Optional)* An **MLflow tracking server** for Optuna trial logging
+- **DVC** available in your environment for pipeline reproduction and remote artifact sync
 
 ---
 
@@ -82,14 +84,34 @@ KAGGLE_KEY=your_kaggle_api_key
 # Optional — wandb logging auto-enables when this key is set
 WANDB_API_KEY=your_wandb_api_key
 WANDB_PROJECT=mlops-lab0
+
+# Optional — Optuna trials are logged to MLflow when this URI is set
+MLFLOW_TRACKING_URI=http://localhost:5000
+
+# Optional — set these when your MLflow server requires basic auth
+MLFLOW_TRACKING_USERNAME=your_mlflow_username
+MLFLOW_TRACKING_PASSWORD=your_mlflow_password
 ```
 
 !!! note
-    If `WANDB_API_KEY` is not set, the pipeline runs normally — wandb logging is simply skipped with a warning.
+    If `WANDB_API_KEY` or `MLFLOW_TRACKING_URI` is not set, the pipeline runs normally and that tracking integration is skipped with a warning.
 
 ---
 
-## 5. Run the Full Pipeline
+## 5. Configure DVC Remote Credentials
+
+The repository already defines the `origin` DVC remote. Configure credentials locally before using `dvc pull` or `dvc push`:
+
+```bash
+dvc remote modify origin --local access_key_id c355...2ffc
+dvc remote modify origin --local secret_access_key c355...2ffc
+```
+
+These credentials are written to `.dvc/config.local` and should not be committed.
+
+---
+
+## 6. Run the Full Pipeline
 
 ```bash
 bash run_pipeline.sh
@@ -105,7 +127,25 @@ This runs all steps in sequence:
 
 ---
 
-## 6. Run Inference
+## 7. Reproduce with DVC
+
+The same workflow is also available through `dvc.yaml`:
+
+```bash
+dvc repro
+```
+
+Common DVC commands:
+
+```bash
+dvc status
+dvc push
+dvc pull
+```
+
+---
+
+## 8. Run Inference
 
 After training, predict on new data:
 
