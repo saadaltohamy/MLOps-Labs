@@ -212,8 +212,8 @@ stages:
       isexec: true
     - path: src/train.py
       hash: md5
-      md5: 93f0b66ccc2d60c7bedb3312621b7925
-      size: 20032
+      md5: 2c7446250ed8ae6fcdc5a844d98efcf5
+      size: 24800
       isexec: true
     params:
       config.yaml:
@@ -224,24 +224,24 @@ stages:
         reports.train_metrics_file: reports/train_metrics.json
         training.cv_folds: 5
         training.model_path: models/best_model.pkl
-        training.n_trials: 10
+        training.n_trials: 5
         training.random_state: 42
-        training.study_name: titanic_tree_search
+        training.study_name: titanic_best_accuracy_model-signature
     outs:
     - path: models/best_model.pkl
       hash: md5
-      md5: 00d7f32cdafb7df561d0d51f9725cd0b
-      size: 328559
+      md5: 429dada0c1e8affb97f2897b40df8083
+      size: 702990
       isexec: true
     - path: reports/figures/optuna_top10_accuracy.png
       hash: md5
-      md5: 99f969d1091de0011513cdd1144fa2cd
-      size: 52463
+      md5: a58e852cf07953d375f882a38b37426f
+      size: 38292
       isexec: true
     - path: reports/train_metrics.json
       hash: md5
-      md5: da787b790ff0fcb0a1c655ef59652150
-      size: 408
+      md5: 688bb099572ad46808064e0fcecc7804
+      size: 409
       isexec: true
   evaluate:
     cmd: python src/test_model.py
@@ -258,8 +258,8 @@ stages:
       isexec: true
     - path: models/best_model.pkl
       hash: md5
-      md5: 00d7f32cdafb7df561d0d51f9725cd0b
-      size: 328559
+      md5: 429dada0c1e8affb97f2897b40df8083
+      size: 702990
       isexec: true
     - path: models/preprocessing_pipeline.pkl
       hash: md5
@@ -268,8 +268,8 @@ stages:
       isexec: true
     - path: reports/train_metrics.json
       hash: md5
-      md5: da787b790ff0fcb0a1c655ef59652150
-      size: 408
+      md5: 688bb099572ad46808064e0fcecc7804
+      size: 409
       isexec: true
     - path: src/config.py
       hash: md5
@@ -296,6 +296,6 @@ stages:
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: cfc741c43b78f9e0a9c460befe277c93
+      md5: 08cf2ecd08e61f170fe1c1937aa96370
       size: 497
       isexec: true
