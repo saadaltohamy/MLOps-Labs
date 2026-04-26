@@ -20,6 +20,7 @@ Built as part of the **ITI MLOps Course — Labs**.
 - **Optuna hyperparameter optimization** across 6 model families (RF, ExtraTrees, GBT, HistGBT, XGBoost, CatBoost)
 - **Weights & Biases integration** — optional experiment tracking (auto-enabled if `WANDB_API_KEY` is set)
 - **MLflow integration** — optional Optuna trial tracking (auto-enabled if `MLFLOW_TRACKING_URI` is set)
+- **DVC integration** — reproducible `download -> preprocess -> validate -> train -> evaluate` pipeline with remote artifact storage
 - **Data validation tests** — `pytest` checks run after preprocessing; training only proceeds if all tests pass
 - **Colored logging** — all pipeline output uses a centralized logger with color-coded log levels
 - **Hydra config management** — all settings in `config.yaml` with **CLI overrides** (`training.n_trials=5`)
@@ -130,11 +131,26 @@ WANDB_PROJECT=mlops-lab0
 
 # Optional — Optuna trials are logged to MLflow when this is set
 MLFLOW_TRACKING_URI=http://localhost:5000
+
+# Optional — set these when your MLflow server requires basic auth
+MLFLOW_TRACKING_USERNAME=your_mlflow_username
+MLFLOW_TRACKING_PASSWORD=your_mlflow_password
 ```
 
 > **Note:** If `WANDB_API_KEY` or `MLFLOW_TRACKING_URI` is not set, the pipeline runs normally — that tracking integration is simply skipped.
 
-### 5. Run the full pipeline
+### 5. Configure DVC remote credentials
+
+This repository already defines the `origin` DVC remote. Before using `dvc pull` or `dvc push`, configure your credentials locally so they are not committed to Git:
+
+```bash
+dvc remote modify origin --local access_key_id c355...2ffc
+dvc remote modify origin --local secret_access_key c355...2ffc
+```
+
+These values are stored in `.dvc/config.local`, which should remain untracked.
+
+### 6. Run the full pipeline
 
 ```bash
 bash run_pipeline.sh
@@ -149,6 +165,22 @@ This executes all steps in order:
 | 3 | `pytest tests/test_data.py -v` | Validates processed data — **pipeline stops if tests fail** |
 | 4 | `python -m src.train` | Runs Optuna HPO (30 trials), saves best model + metrics + chart |
 | 5 | `python -m src.test_model` | Evaluates on validation set, reports accuracy + ROC-AUC |
+
+### 7. Run the DVC pipeline
+
+You can reproduce the same workflow through DVC:
+
+```bash
+dvc repro
+```
+
+Useful DVC commands:
+
+```bash
+dvc status
+dvc push
+dvc pull
+```
 
 ---
 

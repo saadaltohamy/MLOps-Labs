@@ -1,6 +1,31 @@
 # Pipeline Overview
 
-The Titanic ML pipeline is a sequential workflow that automates the full machine learning lifecycle — from raw data to predictions.
+The Titanic ML pipeline is a sequential workflow that automates the full machine learning lifecycle — from raw data to predictions. It can be run either through `run_pipeline.sh` or reproduced stage-by-stage through DVC using `dvc.yaml`.
+
+---
+
+## DVC Integration
+
+The repository includes a DVC pipeline with these stages:
+
+1. `download`
+2. `preprocess`
+3. `validate`
+4. `train`
+5. `evaluate`
+
+Before using `dvc pull` or `dvc push`, configure the existing `origin` remote locally:
+
+```bash
+dvc remote modify origin --local access_key_id c355...2ffc
+dvc remote modify origin --local secret_access_key c355...2ffc
+```
+
+Run the pipeline with:
+
+```bash
+dvc repro
+```
 
 ---
 
@@ -39,10 +64,10 @@ The Titanic ML pipeline is a sequential workflow that automates the full machine
 │  ├─ Search across 6 model families:                          │
 │  │   RF, ExtraTrees, GBT, HistGBT, XGBoost, CatBoost         │
 │  ├─ 5-fold StratifiedKFold cross-validation                  │
-│  ├─ Optional: log to Weights & Biases                        │
-│  ├─ Retrain best model on full training set                  │
+│  ├─ Optional: log to Weights & Biases and MLflow             │
+│  ├─ Retrain best model on full train+valid set               │
 │  ├─ Save model → models/best_model.pkl                       │
-│  ├─ Save metrics → reports/metrics.json                      │
+│  ├─ Save metrics → reports/train_metrics.json                │
 │  └─ Save chart → reports/figures/optuna_top10_accuracy.png   │
 │                          ↓                                   │
 │  Step 5: test_model.py                                       │
@@ -77,8 +102,9 @@ The Optuna study searches across these 6 model families:
 |------|-------------|
 | `models/best_model.pkl` | Serialized best model (includes preprocessing pipeline) |
 | `models/preprocessing_pipeline.pkl` | Fitted sklearn `ColumnTransformer` objects |
-| `reports/metrics.json` | Training & validation accuracy, ROC-AUC |
-| `reports/figures/optuna_top10_accuracy.png` | Bar chart of top 10 Optuna trials by ROC-AUC |
+| `reports/train_metrics.json` | Training accuracy, ROC-AUC, best CV accuracy, best params |
+| `reports/metrics.json` | Validation accuracy and ROC-AUC |
+| `reports/figures/optuna_top10_accuracy.png` | Bar chart of top 10 Optuna trials by accuracy |
 | `data/processed/*.csv` | Processed train/valid splits |
 
 ---
