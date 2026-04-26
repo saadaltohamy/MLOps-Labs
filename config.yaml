@@ -22,6 +22,7 @@ training:
 
 reports:
   dir: "reports"
+  train_metrics_file: "reports/train_metrics.json"
   metrics_file: "reports/metrics.json"
   optuna_top10_chart: "reports/figures/optuna_top10_accuracy.png"
 

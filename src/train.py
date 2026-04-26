@@ -455,7 +455,7 @@ def run_training() -> None:
     # --- Save metrics ---
     reports_dir = resolve_path(cfg_reports["dir"])
     reports_dir.mkdir(parents=True, exist_ok=True)
-    metrics_file = resolve_path(cfg_reports["metrics_file"])
+    metrics_file = resolve_path(cfg_reports["train_metrics_file"])
 
     # Compute training accuracy
     y_train_pred = best_model.predict(best_X_train)
@@ -474,7 +474,7 @@ def run_training() -> None:
     }
     with open(metrics_file, "w") as f:
         json.dump(metrics, f, indent=2, default=str)
-    logger.info(f"Metrics saved to {metrics_file}")
+    logger.info(f"Training metrics saved to {metrics_file}")
 
     # --- Generate top-10 trials chart ---
     chart_path = resolve_path(cfg_reports["optuna_top10_chart"])

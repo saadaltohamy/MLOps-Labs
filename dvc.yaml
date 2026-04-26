@@ -1,0 +1,111 @@
+stages:
+  download:
+    cmd: python src/download_data.py
+    deps:
+      - src/download_data.py
+      - src/config.py
+      - src/logger.py
+    params:
+      - config.yaml:
+          - data.raw_dir
+          - data.train_csv
+          - data.test_csv
+    outs:
+      - data/raw/train.csv
+      - data/raw/test.csv
+
+  preprocess:
+    cmd: python src/preprocess.py
+    deps:
+      - src/preprocess.py
+      - src/config.py
+      - src/logger.py
+      - data/raw/train.csv
+      - data/raw/test.csv
+    params:
+      - config.yaml:
+          - data.processed_dir
+          - preprocessing.dropped_columns
+          - preprocessing.target_column
+          - preprocessing.numeric_features
+          - preprocessing.categorical_features
+          - preprocessing.test_size
+          - preprocessing.random_state
+          - preprocessing.pipeline_path
+    outs:
+      - data/processed/X_train.csv
+      - data/processed/X_valid.csv
+      - data/processed/y_train.csv
+      - data/processed/y_valid.csv
+      - data/processed/X_test_competition.csv
+      - data/processed/test_passenger_ids.csv
+      - models/preprocessing_pipeline.pkl
+
+  validate:
+    cmd: python -m pytest tests/test_data.py -v
+    deps:
+      - tests/test_data.py
+      - src/config.py
+      - data/processed/X_train.csv
+      - data/processed/X_valid.csv
+      - data/processed/y_train.csv
+      - data/processed/y_valid.csv
+      - data/processed/X_test_competition.csv
+      - data/processed/test_passenger_ids.csv
+      - models/preprocessing_pipeline.pkl
+    params:
+      - config.yaml:
+          - data.processed_dir
+          - preprocessing.pipeline_path
+          - preprocessing.numeric_features
+          - preprocessing.categorical_features
+          - preprocessing.test_size
+
+  train:
+    cmd: python src/train.py
+    deps:
+      - src/train.py
+      - src/config.py
+      - src/logger.py
+      - data/processed/X_train.csv
+      - data/processed/y_train.csv
+      - models/preprocessing_pipeline.pkl
+    params:
+      - config.yaml:
+          - data.processed_dir
+          - preprocessing.pipeline_path
+          - training.n_trials
+          - training.cv_folds
+          - training.random_state
+          - training.model_path
+          - training.study_name
+          - reports.dir
+          - reports.train_metrics_file
+          - reports.optuna_top10_chart
+    outs:
+      - models/best_model.pkl
+    metrics:
+      - reports/train_metrics.json
+    plots:
+      - reports/figures/optuna_top10_accuracy.png
+
+  evaluate:
+    cmd: python src/test_model.py
+    deps:
+      - src/test_model.py
+      - src/config.py
+      - src/logger.py
+      - data/processed/X_valid.csv
+      - data/processed/y_valid.csv
+      - models/best_model.pkl
+      - models/preprocessing_pipeline.pkl
+      - reports/train_metrics.json
+    params:
+      - config.yaml:
+          - data.processed_dir
+          - preprocessing.pipeline_path
+          - training.model_path
+          - reports.train_metrics_file
+          - reports.metrics_file
+    metrics:
+      - reports/metrics.json
