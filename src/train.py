@@ -3,9 +3,9 @@ Training module:
   - Loads preprocessed data and preprocessing pipelines from pickle
   - Runs Optuna hyperparameter optimization across multiple model families
   - Saves the best model to pickle
-  - Outputs metrics (accuracy, roc_auc) to reports/metrics.json
+  - Outputs metrics (accuracy, roc_auc) to reports/train_metrics.json
   - Generates a bar chart of top-10 trials by accuracy
-  - Optionally logs to Weights & Biases if WANDB_API_KEY is set
+  - Optionally logs Optuna trials to Weights & Biases and MLflow
 """
 
 import json
@@ -13,6 +13,7 @@ import os
 import pickle
 import sys
 from pathlib import Path
+from typing import Any
 
 import matplotlib
 matplotlib.use("Agg")  # non-interactive backend for server/CI environments
@@ -22,6 +23,7 @@ import numpy as np
 import optuna
 import pandas as pd
 import wandb
+import mlflow
 from catboost import CatBoostClassifier
 from dotenv import load_dotenv
 from optuna.integration import WeightsAndBiasesCallback
@@ -319,6 +321,24 @@ def _init_wandb_if_available():
     return wandb
 
 
+def _init_mlflow_if_available(study_name: str):
+    """Return MLflow callback if MLFLOW_TRACKING_URI is set, else None."""
+    tracking_uri = os.environ.get("MLFLOW_TRACKING_URI")
+    if not tracking_uri:
+        logger.warning("MLFLOW_TRACKING_URI not set - skipping MLflow logging.")
+        return None
+
+    from optuna.integration import MLflowCallback
+
+    mlflow.set_tracking_uri(tracking_uri)
+    logger.info(f"MLflow tracking enabled: {tracking_uri}")
+    return MLflowCallback(
+        tracking_uri=tracking_uri,
+        metric_name="accuracy",
+        mlflow_kwargs={"experiment_name": study_name, "nested": True},
+    )
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -364,6 +384,8 @@ def run_training() -> None:
             wandb_kwargs={"project": os.getenv("WANDB_PROJECT", "mlops-lab0")},
         )
 
+    mlflow_callback = _init_mlflow_if_available(cfg_train["study_name"])
+
     # --- Optuna objective ---
     def objective(trial: optuna.Trial) -> float:
         params = sample_model_params(trial)
@@ -392,19 +414,27 @@ def run_training() -> None:
             y_valid_proba = estimator_fold.predict_proba(X_fold_valid)[:, 1]
             fold_score = roc_auc_score(y_fold_valid, y_valid_proba)
             fold_scores.append(fold_score)
+            mlflow.log_metric(f"fold_{fold_idx}_roc_auc", fold_score)
             trial.report(float(np.mean(fold_scores)), step=fold_idx)
 
-        return float(np.mean(fold_scores))
+        mean_auc = float(np.mean(fold_scores))
+        std_auc = float(np.std(fold_scores))
 
+        mlflow.log_metric("cv_mean_roc_auc", mean_auc)
+        mlflow.log_metric("cv_std_roc_auc", std_auc)
+
+        return mean_auc
     # --- Run study ---
     study = optuna.create_study(
         study_name=cfg_train["study_name"],
         direction="maximize",
     )
 
-    callbacks = []
+    callbacks: list[Any] = []
     if wandb_callback is not None:
         callbacks.append(wandb_callback)
+    if mlflow_callback is not None:
+        callbacks.append(mlflow_callback)
 
     logger.info(f"Starting Optuna study with {n_trials} trials ...")
     study.optimize(objective, n_trials=n_trials, callbacks=callbacks)

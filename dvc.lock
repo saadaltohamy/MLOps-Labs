@@ -212,8 +212,8 @@ stages:
       isexec: true
     - path: src/train.py
       hash: md5
-      md5: 4bd9a7fc58b9ab0db70c4dcb849afa3e
-      size: 19188
+      md5: 93f0b66ccc2d60c7bedb3312621b7925
+      size: 20032
       isexec: true
     params:
       config.yaml:
@@ -224,24 +224,24 @@ stages:
         reports.train_metrics_file: reports/train_metrics.json
         training.cv_folds: 5
         training.model_path: models/best_model.pkl
-        training.n_trials: 30
+        training.n_trials: 10
         training.random_state: 42
         training.study_name: titanic_tree_search
     outs:
     - path: models/best_model.pkl
       hash: md5
-      md5: 153425429911c46010cb1acd113773ee
-      size: 391700
+      md5: 00d7f32cdafb7df561d0d51f9725cd0b
+      size: 328559
       isexec: true
     - path: reports/figures/optuna_top10_accuracy.png
       hash: md5
-      md5: 7051baee3923b67b6a8d3e17dfa8f415
-      size: 57140
+      md5: 99f969d1091de0011513cdd1144fa2cd
+      size: 52463
       isexec: true
     - path: reports/train_metrics.json
       hash: md5
-      md5: 895a75dda6492009d63510f1348180aa
-      size: 479
+      md5: da787b790ff0fcb0a1c655ef59652150
+      size: 408
       isexec: true
   evaluate:
     cmd: python src/test_model.py
@@ -258,8 +258,8 @@ stages:
       isexec: true
     - path: models/best_model.pkl
       hash: md5
-      md5: 153425429911c46010cb1acd113773ee
-      size: 391700
+      md5: 00d7f32cdafb7df561d0d51f9725cd0b
+      size: 328559
       isexec: true
     - path: models/preprocessing_pipeline.pkl
       hash: md5
@@ -268,8 +268,8 @@ stages:
       isexec: true
     - path: reports/train_metrics.json
       hash: md5
-      md5: 895a75dda6492009d63510f1348180aa
-      size: 479
+      md5: da787b790ff0fcb0a1c655ef59652150
+      size: 408
       isexec: true
     - path: src/config.py
       hash: md5
@@ -296,6 +296,6 @@ stages:
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: 3da9bc0faf381752f3809eb3537e4719
-      size: 566
+      md5: cfc741c43b78f9e0a9c460befe277c93
+      size: 497
       isexec: true

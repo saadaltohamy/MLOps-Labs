@@ -9,6 +9,7 @@ This guide walks you through setting up and running the Titanic ML pipeline from
 - **Python 3.12+**
 - A **Kaggle account** with an API key ([how to get one](https://www.kaggle.com/docs/api))
 - *(Optional)* A **Weights & Biases** account for experiment tracking
+- *(Optional)* An **MLflow tracking server** for Optuna trial logging
 
 ---
 
@@ -82,10 +83,13 @@ KAGGLE_KEY=your_kaggle_api_key
 # Optional — wandb logging auto-enables when this key is set
 WANDB_API_KEY=your_wandb_api_key
 WANDB_PROJECT=mlops-lab0
+
+# Optional — Optuna trials are logged to MLflow when this URI is set
+MLFLOW_TRACKING_URI=http://localhost:5000
 ```
 
 !!! note
-    If `WANDB_API_KEY` is not set, the pipeline runs normally — wandb logging is simply skipped with a warning.
+    If `WANDB_API_KEY` or `MLFLOW_TRACKING_URI` is not set, the pipeline runs normally and that tracking integration is skipped with a warning.
 
 ---
 

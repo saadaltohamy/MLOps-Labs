@@ -19,6 +19,7 @@ Built as part of the **ITI MLOps Course — Labs**.
 - **Modular pipeline** — Download → Preprocess → Validate → Train → Test → Inference
 - **Optuna hyperparameter optimization** across 6 model families (RF, ExtraTrees, GBT, HistGBT, XGBoost, CatBoost)
 - **Weights & Biases integration** — optional experiment tracking (auto-enabled if `WANDB_API_KEY` is set)
+- **MLflow integration** — optional Optuna trial tracking (auto-enabled if `MLFLOW_TRACKING_URI` is set)
 - **Data validation tests** — `pytest` checks run after preprocessing; training only proceeds if all tests pass
 - **Colored logging** — all pipeline output uses a centralized logger with color-coded log levels
 - **Hydra config management** — all settings in `config.yaml` with **CLI overrides** (`training.n_trials=5`)
@@ -31,7 +32,7 @@ Built as part of the **ITI MLOps Course — Labs**.
 ```
 MLOps-Labs/
 ├── config.yaml                     # Central configuration (paths, features, training params)
-├── .env                            # Environment variables (Kaggle + wandb keys)
+├── .env                            # Environment variables (Kaggle + tracking keys)
 ├── .env.example                    # Template for .env
 ├── run_pipeline.sh                 # One-command pipeline orchestration
 │
@@ -126,9 +127,12 @@ KAGGLE_KEY=your_kaggle_api_key
 # Optional — wandb tracking is enabled automatically when this is set
 WANDB_API_KEY=your_wandb_api_key
 WANDB_PROJECT=mlops-lab0
+
+# Optional — Optuna trials are logged to MLflow when this is set
+MLFLOW_TRACKING_URI=http://localhost:5000
 ```
 
-> **Note:** If `WANDB_API_KEY` is not set, the pipeline runs normally — wandb logging is simply skipped.
+> **Note:** If `WANDB_API_KEY` or `MLFLOW_TRACKING_URI` is not set, the pipeline runs normally — that tracking integration is simply skipped.
 
 ### 5. Run the full pipeline
 

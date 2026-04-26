@@ -1,6 +1,6 @@
 # `src.train`
 
-Training module. Runs Optuna hyperparameter optimization across 6 model families, saves the best model, generates metrics and charts, and optionally logs to Weights & Biases.
+Training module. Runs Optuna hyperparameter optimization across 6 model families, saves the best model, generates metrics and charts, and optionally logs Optuna trials to Weights & Biases and MLflow.
 
 ---
 
@@ -153,6 +153,22 @@ Checks if `WANDB_API_KEY` is set in the environment. If so, calls `wandb.login()
 
 ---
 
+### `_init_mlflow_if_available`
+
+```python
+def _init_mlflow_if_available(study_name: str) -> MLflowCallback | None
+```
+
+Checks if `MLFLOW_TRACKING_URI` is set in the environment. If so, configures MLflow tracking and returns an Optuna `MLflowCallback`. If not, logs a warning and returns `None`.
+
+**Returns:**
+
+| Type | Description |
+|------|-------------|
+| `MLflowCallback` or `None` | The Optuna MLflow callback if enabled, else `None` |
+
+---
+
 ### `run_training`
 
 ```python
@@ -166,12 +182,13 @@ Main training entry point. Orchestrates the full Optuna optimization workflow.
 1. Load processed data (`X_train`, `y_train`) from `data/processed/`
 2. Load preprocessing pipelines from pickle
 3. Initialize wandb if API key is available
-4. Define the Optuna objective function (5-fold StratifiedKFold, ROC-AUC metric)
-5. Run Optuna study with `n_trials` from config
-6. Retrain the best model on the full training set
-7. Save model bundle to pickle
-8. Save metrics to `reports/metrics.json`
-9. Generate top-10 trials bar chart
+4. Initialize MLflow if `MLFLOW_TRACKING_URI` is available
+5. Define the Optuna objective function (5-fold StratifiedKFold, ROC-AUC metric)
+6. Run Optuna study with `n_trials` from config
+7. Retrain the best model on the full training set
+8. Save model bundle to pickle
+9. Save metrics to `reports/train_metrics.json`
+10. Generate top-10 trials bar chart
 
 **Config Keys Used:**
 
@@ -188,7 +205,7 @@ Main training entry point. Orchestrates the full Optuna optimization workflow.
 | File | Content |
 |------|---------|
 | `models/best_model.pkl` | Serialized best model bundle |
-| `reports/metrics.json` | Training metrics (accuracy, ROC-AUC, best params) |
+| `reports/train_metrics.json` | Training metrics (accuracy, ROC-AUC, best params) |
 | `reports/figures/optuna_top10_accuracy.png` | Top 10 trials bar chart |
 
 **Model Bundle Contents:**
