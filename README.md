@@ -182,6 +182,40 @@ dvc push
 dvc pull
 ```
 
+### 8. Serve the registered MLflow model
+
+Build the serving image:
+
+```bash
+docker build -t titanic-mlflow-serve .
+```
+
+Run the container with your MLflow credentials from `.env`:
+
+```bash
+docker run -p 5000:5000 --env-file .env titanic-mlflow-serve
+```
+
+Invoke the served model:
+
+```bash
+curl -X POST http://127.0.0.1:5000/invocations \
+  -H "Content-Type: application/json" \
+  -d '{
+    "dataframe_records": [
+      {
+        "Pclass": 3,
+        "Sex": "male",
+        "Age": 22,
+        "SibSp": 1,
+        "Parch": 0,
+        "Fare": 7.25,
+        "Embarked": "S"
+      }
+    ]
+  }'
+```
+
 ---
 
 ## 🔧 Running Individual Steps
