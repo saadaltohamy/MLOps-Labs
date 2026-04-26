@@ -212,8 +212,8 @@ stages:
       isexec: true
     - path: src/train.py
       hash: md5
-      md5: c5053cc6878d08a33a4d191da2606d52
-      size: 19173
+      md5: 4bd9a7fc58b9ab0db70c4dcb849afa3e
+      size: 19188
       isexec: true
     params:
       config.yaml:
@@ -221,6 +221,7 @@ stages:
         preprocessing.pipeline_path: models/preprocessing_pipeline.pkl
         reports.dir: reports
         reports.optuna_top10_chart: reports/figures/optuna_top10_accuracy.png
+        reports.train_metrics_file: reports/train_metrics.json
         training.cv_folds: 5
         training.model_path: models/best_model.pkl
         training.n_trials: 30
@@ -229,13 +230,18 @@ stages:
     outs:
     - path: models/best_model.pkl
       hash: md5
-      md5: 39bff4553832420756598cb14f2d9fb6
-      size: 374248
+      md5: 153425429911c46010cb1acd113773ee
+      size: 391700
       isexec: true
     - path: reports/figures/optuna_top10_accuracy.png
       hash: md5
-      md5: cd89f0142eaa49416f7a64eb285e6f91
-      size: 53994
+      md5: 7051baee3923b67b6a8d3e17dfa8f415
+      size: 57140
+      isexec: true
+    - path: reports/train_metrics.json
+      hash: md5
+      md5: 895a75dda6492009d63510f1348180aa
+      size: 479
       isexec: true
   evaluate:
     cmd: python src/test_model.py
@@ -252,13 +258,18 @@ stages:
       isexec: true
     - path: models/best_model.pkl
       hash: md5
-      md5: 39bff4553832420756598cb14f2d9fb6
-      size: 374248
+      md5: 153425429911c46010cb1acd113773ee
+      size: 391700
       isexec: true
     - path: models/preprocessing_pipeline.pkl
       hash: md5
       md5: 91988ca9324abc178be2f31962649e81
       size: 3255
+      isexec: true
+    - path: reports/train_metrics.json
+      hash: md5
+      md5: 895a75dda6492009d63510f1348180aa
+      size: 479
       isexec: true
     - path: src/config.py
       hash: md5
@@ -272,18 +283,19 @@ stages:
       isexec: true
     - path: src/test_model.py
       hash: md5
-      md5: e68f8f65cba38839635776d4179f5a9e
-      size: 3025
+      md5: 7cac8374dd20202b654c13d31b58e918
+      size: 3156
       isexec: true
     params:
       config.yaml:
         data.processed_dir: data/processed
         preprocessing.pipeline_path: models/preprocessing_pipeline.pkl
         reports.metrics_file: reports/metrics.json
+        reports.train_metrics_file: reports/train_metrics.json
         training.model_path: models/best_model.pkl
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: ef5843880c3abfe33b77d1c2c2575947
-      size: 91
+      md5: 3da9bc0faf381752f3809eb3537e4719
+      size: 566
       isexec: true
