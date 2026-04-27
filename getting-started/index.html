@@ -65,9 +65,15 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#4-set-up-environment-variables">4. Set Up Environment Variables</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#5-run-the-full-pipeline">5. Run the Full Pipeline</a>
+    <li class="toctree-l2"><a class="reference internal" href="#5-configure-dvc-remote-credentials">5. Configure DVC Remote Credentials</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#6-run-inference">6. Run Inference</a>
+    <li class="toctree-l2"><a class="reference internal" href="#6-run-the-full-pipeline">6. Run the Full Pipeline</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#7-reproduce-with-dvc">7. Reproduce with DVC</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#8-run-inference">8. Run Inference</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#9-serve-the-registered-mlflow-model">9. Serve the registered MLflow model</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#running-individual-steps">Running Individual Steps</a>
         <ul>
@@ -138,6 +144,8 @@
 <li><strong>Python 3.12+</strong></li>
 <li>A <strong>Kaggle account</strong> with an API key (<a href="https://www.kaggle.com/docs/api">how to get one</a>)</li>
 <li><em>(Optional)</em> A <strong>Weights &amp; Biases</strong> account for experiment tracking</li>
+<li><em>(Optional)</em> An <strong>MLflow tracking server</strong> for Optuna trial logging</li>
+<li><strong>DVC</strong> available in your environment for pipeline reproduction and remote artifact sync</li>
 </ul>
 <hr />
 <h2 id="1-clone-the-repository">1. Clone the Repository<a class="headerlink" href="#1-clone-the-repository" title="Permanent link">&para;</a></h2>
@@ -184,13 +192,27 @@ KAGGLE_KEY=your_kaggle_api_key
 # Optional — wandb logging auto-enables when this key is set
 WANDB_API_KEY=your_wandb_api_key
 WANDB_PROJECT=mlops-lab0
+
+# Optional — Optuna trials are logged to MLflow when this URI is set
+MLFLOW_TRACKING_URI=http://localhost:5000
+
+# Optional — set these when your MLflow server requires basic auth
+MLFLOW_TRACKING_USERNAME=your_mlflow_username
+MLFLOW_TRACKING_PASSWORD=your_mlflow_password
 </code></pre>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If <code>WANDB_API_KEY</code> is not set, the pipeline runs normally — wandb logging is simply skipped with a warning.</p>
+<p>If <code>WANDB_API_KEY</code> or <code>MLFLOW_TRACKING_URI</code> is not set, the pipeline runs normally and that tracking integration is skipped with a warning.</p>
 </div>
 <hr />
-<h2 id="5-run-the-full-pipeline">5. Run the Full Pipeline<a class="headerlink" href="#5-run-the-full-pipeline" title="Permanent link">&para;</a></h2>
+<h2 id="5-configure-dvc-remote-credentials">5. Configure DVC Remote Credentials<a class="headerlink" href="#5-configure-dvc-remote-credentials" title="Permanent link">&para;</a></h2>
+<p>The repository already defines the <code>origin</code> DVC remote. Configure credentials locally before using <code>dvc pull</code> or <code>dvc push</code>:</p>
+<pre><code class="language-bash">dvc remote modify origin --local access_key_id c355...2ffc
+dvc remote modify origin --local secret_access_key c355...2ffc
+</code></pre>
+<p>These credentials are written to <code>.dvc/config.local</code> and should not be committed.</p>
+<hr />
+<h2 id="6-run-the-full-pipeline">6. Run the Full Pipeline<a class="headerlink" href="#6-run-the-full-pipeline" title="Permanent link">&para;</a></h2>
 <pre><code class="language-bash">bash run_pipeline.sh
 </code></pre>
 <p>This runs all steps in sequence:</p>
@@ -202,9 +224,44 @@ WANDB_PROJECT=mlops-lab0
 <li><strong>Test</strong> — evaluates best model on validation set</li>
 </ol>
 <hr />
-<h2 id="6-run-inference">6. Run Inference<a class="headerlink" href="#6-run-inference" title="Permanent link">&para;</a></h2>
+<h2 id="7-reproduce-with-dvc">7. Reproduce with DVC<a class="headerlink" href="#7-reproduce-with-dvc" title="Permanent link">&para;</a></h2>
+<p>The same workflow is also available through <code>dvc.yaml</code>:</p>
+<pre><code class="language-bash">dvc repro
+</code></pre>
+<p>Common DVC commands:</p>
+<pre><code class="language-bash">dvc status
+dvc push
+dvc pull
+</code></pre>
+<hr />
+<h2 id="8-run-inference">8. Run Inference<a class="headerlink" href="#8-run-inference" title="Permanent link">&para;</a></h2>
 <p>After training, predict on new data:</p>
 <pre><code class="language-bash">python src/inference.py --input data/raw/test.csv --output reports/predictions.csv
+</code></pre>
+<hr />
+<h2 id="9-serve-the-registered-mlflow-model">9. Serve the registered MLflow model<a class="headerlink" href="#9-serve-the-registered-mlflow-model" title="Permanent link">&para;</a></h2>
+<p>Build the serving image:</p>
+<pre><code class="language-bash">docker build -t titanic-mlflow-serve .
+</code></pre>
+<p>Run the container with your MLflow credentials from <code>.env</code>:</p>
+<pre><code class="language-bash">docker run -p 5000:5000 --env-file .env titanic-mlflow-serve
+</code></pre>
+<p>Invoke the served model:</p>
+<pre><code class="language-bash">curl -X POST http://127.0.0.1:5000/invocations \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{
+    &quot;dataframe_records&quot;: [
+      {
+        &quot;Pclass&quot;: 3,
+        &quot;Sex&quot;: &quot;male&quot;,
+        &quot;Age&quot;: 22,
+        &quot;SibSp&quot;: 1,
+        &quot;Parch&quot;: 0,
+        &quot;Fare&quot;: 7.25,
+        &quot;Embarked&quot;: &quot;S&quot;
+      }
+    ]
+  }'
 </code></pre>
 <hr />
 <h2 id="running-individual-steps">Running Individual Steps<a class="headerlink" href="#running-individual-steps" title="Permanent link">&para;</a></h2>

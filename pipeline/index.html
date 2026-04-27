@@ -53,6 +53,8 @@
               <ul class="current">
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">Pipeline Overview</a>
     <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#dvc-integration">DVC Integration</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#pipeline-flow">Pipeline Flow</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#model-families">Model Families</a>
@@ -113,7 +115,24 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="pipeline-overview">Pipeline Overview<a class="headerlink" href="#pipeline-overview" title="Permanent link">&para;</a></h1>
-<p>The Titanic ML pipeline is a sequential workflow that automates the full machine learning lifecycle — from raw data to predictions.</p>
+<p>The Titanic ML pipeline is a sequential workflow that automates the full machine learning lifecycle — from raw data to predictions. It can be run either through <code>run_pipeline.sh</code> or reproduced stage-by-stage through DVC using <code>dvc.yaml</code>.</p>
+<hr />
+<h2 id="dvc-integration">DVC Integration<a class="headerlink" href="#dvc-integration" title="Permanent link">&para;</a></h2>
+<p>The repository includes a DVC pipeline with these stages:</p>
+<ol>
+<li><code>download</code></li>
+<li><code>preprocess</code></li>
+<li><code>validate</code></li>
+<li><code>train</code></li>
+<li><code>evaluate</code></li>
+</ol>
+<p>Before using <code>dvc pull</code> or <code>dvc push</code>, configure the existing <code>origin</code> remote locally:</p>
+<pre><code class="language-bash">dvc remote modify origin --local access_key_id c355...2ffc
+dvc remote modify origin --local secret_access_key c355...2ffc
+</code></pre>
+<p>Run the pipeline with:</p>
+<pre><code class="language-bash">dvc repro
+</code></pre>
 <hr />
 <h2 id="pipeline-flow">Pipeline Flow<a class="headerlink" href="#pipeline-flow" title="Permanent link">&para;</a></h2>
 <pre><code>┌──────────────────────────────────────────────────────────────┐
@@ -148,10 +167,10 @@
 │  ├─ Search across 6 model families:                          │
 │  │   RF, ExtraTrees, GBT, HistGBT, XGBoost, CatBoost         │
 │  ├─ 5-fold StratifiedKFold cross-validation                  │
-│  ├─ Optional: log to Weights &amp; Biases                        │
-│  ├─ Retrain best model on full training set                  │
+│  ├─ Optional: log to Weights &amp; Biases and MLflow             │
+│  ├─ Retrain best model on full train+valid set               │
 │  ├─ Save model → models/best_model.pkl                       │
-│  ├─ Save metrics → reports/metrics.json                      │
+│  ├─ Save metrics → reports/train_metrics.json                │
 │  └─ Save chart → reports/figures/optuna_top10_accuracy.png   │
 │                          ↓                                   │
 │  Step 5: test_model.py                                       │
@@ -225,12 +244,16 @@
 <td>Fitted sklearn <code>ColumnTransformer</code> objects</td>
 </tr>
 <tr>
+<td><code>reports/train_metrics.json</code></td>
+<td>Training accuracy, ROC-AUC, best CV accuracy, best params</td>
+</tr>
+<tr>
 <td><code>reports/metrics.json</code></td>
-<td>Training &amp; validation accuracy, ROC-AUC</td>
+<td>Validation accuracy and ROC-AUC</td>
 </tr>
 <tr>
 <td><code>reports/figures/optuna_top10_accuracy.png</code></td>
-<td>Bar chart of top 10 Optuna trials by ROC-AUC</td>
+<td>Bar chart of top 10 Optuna trials by accuracy</td>
 </tr>
 <tr>
 <td><code>data/processed/*.csv</code></td>

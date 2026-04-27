@@ -88,6 +88,8 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#_init_wandb_if_available">_init_wandb_if_available</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#_init_mlflow_if_available">_init_mlflow_if_available</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#run_training">run_training</a>
     </li>
         </ul>
@@ -128,7 +130,7 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="srctrain"><code>src.train</code><a class="headerlink" href="#srctrain" title="Permanent link">&para;</a></h1>
-<p>Training module. Runs Optuna hyperparameter optimization across 6 model families, saves the best model, generates metrics and charts, and optionally logs to Weights &amp; Biases.</p>
+<p>Training module. Runs Optuna hyperparameter optimization across 6 model families, saves the best model, generates metrics and charts, and optionally logs Optuna trials to Weights &amp; Biases and MLflow.</p>
 <hr />
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
 <pre><code class="language-bash">python src/train.py
@@ -394,6 +396,26 @@
 </tbody>
 </table>
 <hr />
+<h3 id="_init_mlflow_if_available"><code>_init_mlflow_if_available</code><a class="headerlink" href="#_init_mlflow_if_available" title="Permanent link">&para;</a></h3>
+<pre><code class="language-python">def _init_mlflow_if_available(study_name: str) -&gt; MLflowCallback | None
+</code></pre>
+<p>Checks if <code>MLFLOW_TRACKING_URI</code> is set in the environment. If so, configures MLflow tracking and returns an Optuna <code>MLflowCallback</code>. If not, logs a warning and returns <code>None</code>.</p>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MLflowCallback</code> or <code>None</code></td>
+<td>The Optuna MLflow callback if enabled, else <code>None</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
 <h3 id="run_training"><code>run_training</code><a class="headerlink" href="#run_training" title="Permanent link">&para;</a></h3>
 <pre><code class="language-python">def run_training() -&gt; None
 </code></pre>
@@ -403,11 +425,12 @@
 <li>Load processed data (<code>X_train</code>, <code>y_train</code>) from <code>data/processed/</code></li>
 <li>Load preprocessing pipelines from pickle</li>
 <li>Initialize wandb if API key is available</li>
+<li>Initialize MLflow if <code>MLFLOW_TRACKING_URI</code> is available</li>
 <li>Define the Optuna objective function (5-fold StratifiedKFold, ROC-AUC metric)</li>
 <li>Run Optuna study with <code>n_trials</code> from config</li>
 <li>Retrain the best model on the full training set</li>
 <li>Save model bundle to pickle</li>
-<li>Save metrics to <code>reports/metrics.json</code></li>
+<li>Save metrics to <code>reports/train_metrics.json</code></li>
 <li>Generate top-10 trials bar chart</li>
 </ol>
 <p><strong>Config Keys Used:</strong></p>
@@ -455,7 +478,7 @@
 <td>Serialized best model bundle</td>
 </tr>
 <tr>
-<td><code>reports/metrics.json</code></td>
+<td><code>reports/train_metrics.json</code></td>
 <td>Training metrics (accuracy, ROC-AUC, best params)</td>
 </tr>
 <tr>
